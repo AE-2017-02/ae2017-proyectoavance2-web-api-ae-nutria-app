@@ -1,0 +1,12 @@
+var mongoose=require('mongoose');
+
+var planAlimenticioSchema=new mongoose.Schema({
+    dCreacion:{type:Date, required:true,default: new Date()},     
+    nIdPaciente:{type:mongoose.Schema.Types.ObjectId},    
+    oPlan:[
+        {
+        nIdMenu:{type:mongoose.Schema.Types.ObjectId},
+        nHora:{type:Number,required:true},        
+        }]    
+});
+module.exports=planAlimenticioSchema;   
