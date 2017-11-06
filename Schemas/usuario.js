@@ -1,10 +1,10 @@
 var mongoose=require('mongoose');
 
 var usuarioSchema=new mongoose.Schema({
-    cNombre:{type:String, required:true,maxlength:100},
-    cPin:{type:String,maxlength:6},
+    cNombre:{type:String, required:true,maxlength:100},    
     bEstado:{type:Boolean, required:true, default:true},
-    nIdPaciente:{type:mongoose.Schema.Types.ObjectId},//{type:mongoose.Schema.Types.ObjectId,required:true},    
+    cImagen: {type: String,required: true,match: /^http:\/\//i},
+    nIdPaciente:{type:mongoose.Schema.Types.ObjectId},//{type:mongoose.Schema.Types.ObjectId,required:true},        
     dAlta:{type:Date,default:new Date()}
 });
 
