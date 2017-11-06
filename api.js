@@ -21,25 +21,25 @@ module.exports = function (wagner) {
         return res.status(status.BAD_REQUEST).json({ error: 'Usuario no especificado!' });
       }
 
-      try{
+      try {
         Usuario.findOne(
-        { "cNombre": datos.Usuario, "bEstado": true }, function (error, user) {
-          if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
-          }
-          if (!user) {
-            return res.status(status.NOT_FOUND).json({ Error: 'Usuario inexistente' });
-          }
-          if (user.nIdPaciente.cPin != datos.Pin)
-            return res.status(status.NOT_FOUND).json({ Error: 'Usuario inexistente' });
+          { "cNombre": datos.Usuario, "bEstado": true }, function (error, user) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            }
+            if (!user) {
+              return res.status(status.NOT_FOUND).json({ Error: 'Usuario inexistente' });
+            }
+            if (user.nIdPaciente.cPin != datos.Pin)
+              return res.status(status.NOT_FOUND).json({ Error: 'Usuario inexistente' });
 
-          return res.json({ Usuario: user });
-        }).select({ cNombre: 1, cImagen: 1 }).populate({
-          path: "nIdPaciente", model: "Paciente", select: {
-            'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1
-          }
-        });
-      }catch(e){
+            return res.json({ Usuario: user });
+          }).select({ cNombre: 1, cImagen: 1 }).populate({
+            path: "nIdPaciente", model: "Paciente", select: {
+              'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1
+            }
+          });
+      } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
       }
     };
@@ -124,44 +124,47 @@ module.exports = function (wagner) {
       catch (e) {
         return res.status(status.BAD_REQUEST).json({ Error: 'Usuario no especificado!' });
       }
-      try{
+      try {
         var Paciente = mongoose.model('Paciente', require('./Schemas/paciente'), 'paciente');
-      Paciente.findOne({
-        "cPin": datos.Pin,
-        "oGenerales.cEmail": datos.Email
-      }, function (error, paciente) {
-        if (error) {
-          return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
-        }
-        if (!paciente) {
-          return res.status(status.CONFLICT).json({ Error: 'El paciente no existe' });
-        }                
-        Usuario.findOne({ "cNombre": datos.Nombre }, function (error, user) {
+        Paciente.findOne({
+          "cPin": datos.Pin,
+          "oGenerales.cEmail": datos.Email
+        }, function (error, paciente) {
           if (error) {
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
-          }          
-          if(mongoose.Schema.Types.ObjectId(user.nIdPaciente)==mongoose.Schema.Types.ObjectId(paciente._id)){
-            return res.status(status.CONFLICT).json({ Error: 'El paciente ya tiene un usuario asignado' });
           }
-          if (user) {
-            return res.status(status.CONFLICT).json({ Error: 'El usuario ya existe' });
-          }        
-          Usuario.create({ "cNombre": datos.Nombre, "cImagen": datos.Imagen, "nIdPaciente": paciente._id },
-            function (error, user) {
-              if (error) {
-                return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
-              }
-              if (!user) {
-                return res.status(status.CONFLICT).json({ Error: 'Problema al registrar el usuario' });
-              }
-              return res.status(status.OK).json({ "Response": "OK" });
-            });
+          if (!paciente) {
+            return res.status(status.CONFLICT).json({ Error: 'El paciente no existe' });
+          }
+          Usuario.findOne({ "cNombre": datos.Nombre }, function (error, user) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            }
 
-        })
-      });
-    } catch(e){
-      return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
-      }           
+            if (user) {
+              if (mongoose.Schema.Types.ObjectId(user.nIdPaciente) == mongoose.Schema.Types.ObjectId(paciente._id)) {
+                return res.status(status.CONFLICT).json({ Error: 'El paciente ya tiene un usuario asignado' });
+              }
+              else {
+                return res.status(status.CONFLICT).json({ Error: 'El usuario ya existe' });
+              }
+            }
+            Usuario.create({ "cNombre": datos.Nombre, "cImagen": datos.Imagen, "nIdPaciente": paciente._id },
+              function (error, user) {
+                if (error) {
+                  return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+                }
+                if (!user) {
+                  return res.status(status.CONFLICT).json({ Error: 'Problema al registrar el usuario' });
+                }
+                return res.status(status.OK).json({ "Response": "OK" });
+              });
+
+          })
+        });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
+      }
     };
   }));
 
