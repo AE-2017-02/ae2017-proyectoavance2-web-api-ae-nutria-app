@@ -21,7 +21,8 @@ module.exports = function (wagner) {
         return res.status(status.BAD_REQUEST).json({ error: 'Usuario no especificado!' });
       }
 
-      Usuario.findOne(
+      try{
+        Usuario.findOne(
         { "cNombre": datos.Usuario, "bEstado": true }, function (error, user) {
           if (error) {
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
@@ -38,6 +39,9 @@ module.exports = function (wagner) {
             'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1
           }
         });
+      }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
+      }
     };
   }));
 
@@ -120,9 +124,8 @@ module.exports = function (wagner) {
       catch (e) {
         return res.status(status.BAD_REQUEST).json({ Error: 'Usuario no especificado!' });
       }
-
-      var Paciente = mongoose.model('Paciente', require('./Schemas/paciente'), 'paciente');
-
+      try{
+        var Paciente = mongoose.model('Paciente', require('./Schemas/paciente'), 'paciente');
       Paciente.findOne({
         "cPin": datos.Pin,
         "oGenerales.cEmail": datos.Email
@@ -132,25 +135,17 @@ module.exports = function (wagner) {
         }
         if (!paciente) {
           return res.status(status.CONFLICT).json({ Error: 'El paciente no existe' });
-        }
-
-        
-        
+        }                
         Usuario.findOne({ "cNombre": datos.Nombre }, function (error, user) {
           if (error) {
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
-          }
-          
-          if(mongoose.Schema.Types.ObjectId(user.nIdPaciente)==mongoose.Schema.Types.ObjectId(paciente._id))
-          {
+          }          
+          if(mongoose.Schema.Types.ObjectId(user.nIdPaciente)==mongoose.Schema.Types.ObjectId(paciente._id)){
             return res.status(status.CONFLICT).json({ Error: 'El paciente ya tiene un usuario asignado' });
           }
-
           if (user) {
             return res.status(status.CONFLICT).json({ Error: 'El usuario ya existe' });
-          }
-
-        
+          }        
           Usuario.create({ "cNombre": datos.Nombre, "cImagen": datos.Imagen, "nIdPaciente": paciente._id },
             function (error, user) {
               if (error) {
@@ -164,6 +159,9 @@ module.exports = function (wagner) {
 
         })
       });
+    } catch(e){
+      return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
+      }           
     };
   }));
 
