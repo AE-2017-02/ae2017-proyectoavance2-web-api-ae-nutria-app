@@ -17,7 +17,8 @@
 	"passport":"0.2.2",
 	"passport-facebook":"2.0.0",
 	"underscore":"1.5.2",
-	"wagner-core":"0.1.0"
+	"wagner-core":"0.1.0",
+  "mongoose-unique-validator":"1.0.6"
   },
   "devDependencies": {
     "gulp": "^3.9.1",

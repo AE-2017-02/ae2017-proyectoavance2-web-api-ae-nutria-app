@@ -315,7 +315,7 @@ module.exports = function (wagner) {
   }));
 
   //Consulta Agrega y actualizar la unidad
-  api.get('unity', wagner.invoke(function (Unidad) {
+  api.get('/unity', wagner.invoke(function (Unidad) {
     return function (req, res) {
       Unidad.find().exec(handleMany.bind(null, 'Unidad', res));
     }
@@ -324,14 +324,14 @@ module.exports = function (wagner) {
   api.post('/unity/add', wagner.invoke(function (Unidad) {
     return function (req, res) {
       try {
-        var datos = req.body.unidad;
+        var datos = req.body.Unidad;
       }
       catch (e) {
         //return res.status(status.BAD_REQUEST).json({ Error: e.message });
         return res.status(status.BAD_REQUEST).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Unidad no especificado', Detalle: e.message });
       }
       try {
-        Unidad.create(datos, function (error, unidad) {
+        Unidad.create({cDescripcion:datos.Descripcion, bMedible:datos.Medible, cImagen:datos.Imagen}, function (error, unidad) {
           if (error) {
             //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
@@ -357,7 +357,7 @@ module.exports = function (wagner) {
   api.put('/unity/update', wagner.invoke(function (Unidad) {
     return function (req, res) {
       try {
-        var datos = req.body.unidad;
+        var datos = req.body.Unidad;
       }
       catch (e) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: e.message });
@@ -365,7 +365,7 @@ module.exports = function (wagner) {
       }
 
       try {
-        Unidad.findOneAndUpdate({ "_id": datos.id },
+        Unidad.findOneAndUpdate({ "_id": datos.IdUnidad },
           {
             $set:
             { "cDescripcion": datos.Descripcion, "bMedible": datos.Medible, "cImagen": datos.Imagen }
@@ -390,16 +390,16 @@ module.exports = function (wagner) {
   }));
 
   //Tipo producto
-  api.get('category', wagner.invoke(function (TipoP) {
+  api.get('/category', wagner.invoke(function (TipoP) {
     return function (req, res) {
-      TipoP.find().exec(handleMany.bind(null, 'Category', res));
+      TipoP.find().exec(handleMany.bind(null, 'Categoria', res));
     }
   }));
 
   api.post('/category/add', wagner.invoke(function (TipoP) {
     return function (req, res) {
       try {
-        var datos = req.body.unidad;
+        var datos = req.body.Categoria;
       }
       catch (e) {
         //return res.status(status.BAD_REQUEST).json({ Error: e.message });
@@ -407,14 +407,15 @@ module.exports = function (wagner) {
 
       }
       try {
-        TipoP.create(datos, function (error, tipo) {
+        TipoP.create({cDescripcion:datos.Descripcion}, function (error, tipo) {
           if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
           }
 
           if (!tipo) {
             //return res.status(status.BAD_REQUEST).json({ Error: "La categoria no fue registrada" });
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La categoria no fue registrada", Detalle:'' });
           }
           //return res.status(status.OK).json({ Response: "OK" });
           return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
@@ -427,27 +428,30 @@ module.exports = function (wagner) {
   }));
 
 
-  api.put('/category/update', wagner.invoke(function (Unidad) {
+  api.put('/category/update', wagner.invoke(function (TipoP) {
     return function (req, res) {
       try {
-        var datos = req.body.unidad;
+        var datos = req.body.Categoria;
       }
       catch (e) {
         return res.status(status.BAD_REQUEST).json({ Error: e.message });
       }
       try {
-        Unidad.findOneAndUpdate({ "_id": datos.id },
+        TipoP.findOneAndUpdate({ "_id": datos.IdCategoria },
           {
             $set:
-            { "cDescripcion": datos.Descripcion, "bMedible": datos.Medible, "cImagen": datos.Imagen }
+            { "cDescripcion": datos.Descripcion}
           }, function (error, unidad) {
             if (error) {
-              return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
             if (!unidad) {
-              return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
+              //return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La unidad no existe", Detalle: '' });
             }
-            return res.status(status.OK).json({ Response: "OK" });
+            //return res.status(status.OK).json({ Response: "OK" });
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
           });
       } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
