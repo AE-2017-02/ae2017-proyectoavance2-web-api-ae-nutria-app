@@ -4,7 +4,7 @@ var funcional=require('underscore');
 
 module.exports=function(wagner){
 	//Conexion a la base de datos Corre2
-	mongoose.connect('mongodb://localhost:27017/nutricionDev');
+	mongoose.connect('mongodb://localhost:27017/nutricionDev',{ useMongoClient: true });
 	//Variable de trabajo compuesta por un Nombre,Estructura,Colección en la bd
 	var Avance=mongoose.model('Avance',require('./Schemas/avance'),'avance');
 	var Cita=mongoose.model('Cita',require('./Schemas/cita'),'cita');

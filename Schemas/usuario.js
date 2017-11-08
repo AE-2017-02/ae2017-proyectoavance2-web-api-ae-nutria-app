@@ -13,3 +13,5 @@ module.exports=usuarioSchema;
 
 //Mayuscula Usuario:{propieda}
 //Retorno Mayuscula Usuario
+
+

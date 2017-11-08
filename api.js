@@ -4,7 +4,7 @@ var status = require('http-status');
 var funcional = require('underscore');
 var assert = require('assert');
 var mongoose = require('mongoose');
-
+mongoose.Promise = global.Promise;
 module.exports = function (wagner) {
   var api = express.Router();
   api.use(bodyparser.json());
@@ -12,35 +12,35 @@ module.exports = function (wagner) {
   //Usuarios
   //Autenticar In {Usuario:{Usuario:"",Pin:""}} 
   //Out IdUsuario IdPaciente
-  api.post('/auth', wagner.invoke(function (Usuario) {
+  api.get('/auth', wagner.invoke(function (Usuario) {
     return function (req, res) {
       try {
         var datos = req.body.Usuario;
       }
       catch (e) {
-        return res.status(status.BAD_REQUEST).json({ error: 'Usuario no especificado!' });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: e.message });
       }
 
       try {
         Usuario.findOne(
           { "cNombre": datos.Usuario, "bEstado": true }, function (error, user) {
             if (error) {
-              return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
             if (!user) {
-              return res.status(status.NOT_FOUND).json({ Error: 'Usuario inexistente' });
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Usuario inexistente', Detalle: '' });
             }
             if (user.nIdPaciente.cPin != datos.Pin)
-              return res.status(status.NOT_FOUND).json({ Error: 'Usuario inexistente' });
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Usuario inexistente', Detalle: '' });
 
-            return res.json({ Usuario: user });
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: user });
           }).select({ cNombre: 1, cImagen: 1 }).populate({
             path: "nIdPaciente", model: "Paciente", select: {
               'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1
             }
           });
       } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Problema al autenticar", Detalle: e.message });
       }
     };
   }));
@@ -59,70 +59,13 @@ module.exports = function (wagner) {
     }
   }));
 
-
-  // IN {"Usuario":{"cNombre" : "LaYare2", "cPin" : "1234", "nIdPaciente" :"59febbc5dc3320d82c139d1c" }}
-  // OUT {Usuario:Usuario}
-  // api.post('/user/add', wagner.invoke(function (Usuario) {
-  //   return function (req, res) {
-  //     try {
-  //       var datos = req.body.Usuario;
-  //     }
-  //     catch (e) {
-  //       return res.status(status.BAD_REQUEST).json({ Error: 'Usuario no especificado!' });
-  //     }
-
-  //     /*Usuario.findOne({
-  //       "cNombre": datos.cNombre
-  //     }, function (error, user) {
-
-  //       if (error) {
-  //         return res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.toString() });
-  //       }
-  //       if (user) {
-  //         return res.status(status.CONFLICT).json({ error: 'El usuario ya existe' });
-  //       }
-  //       Usuario.create(datos, function (error, usuario) {
-  //         if (error) {
-  //           return res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.toString() });
-  //         }
-  //         return res.json({ Usuario: usuario });
-  //       });
-  //     });*/
-  //     Usuario.findOne({
-  //       "cNombre": datos.cNombre
-  //     }, function (error, user) {
-
-  //       if (error) {
-  //         return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
-  //       }
-  //       if (user) {
-  //         return res.status(status.CONFLICT).json({ Error: 'El usuario ya existe' });
-  //       }
-  //       // Usuario.create(datos, function (error, usuario) {
-  //       //   if (error) {
-  //       //     return res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.toString() });
-  //       //   }
-  //       //return res.json({ Usuario: usuario });
-  //       //});
-  //       return res.json({ Usuario: user });
-  //     }).populate(
-  //       {
-  //         path: "nIdPaciente", model: "Paciente", select: {
-  //           'oGenerales.cEmail': 1, '_id': 1
-  //         }
-  //       });
-  //   };
-  // }));
-
-
-
   api.post('/user/add', wagner.invoke(function (Usuario, Paciente) {
     return function (req, res) {
       try {
         var datos = req.body.Usuario;
       }
       catch (e) {
-        return res.status(status.BAD_REQUEST).json({ Error: 'Usuario no especificado!' });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: error.toString() });
       }
       try {
         var Paciente = mongoose.model('Paciente', require('./Schemas/paciente'), 'paciente');
@@ -131,39 +74,51 @@ module.exports = function (wagner) {
           "oGenerales.cEmail": datos.Email
         }, function (error, paciente) {
           if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
           }
           if (!paciente) {
-            return res.status(status.CONFLICT).json({ Error: 'El paciente no existe' });
+            //return res.status(status.CONFLICT).json({ Error: 'El paciente no existe' });
+            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });
           }
           Usuario.findOne({ "cNombre": datos.Nombre }, function (error, user) {
             if (error) {
-              return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
 
             if (user) {
               if (mongoose.Schema.Types.ObjectId(user.nIdPaciente) == mongoose.Schema.Types.ObjectId(paciente._id)) {
-                return res.status(status.CONFLICT).json({ Error: 'El paciente ya tiene un usuario asignado' });
+
+                return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El paciente ya tiene un usuario asignado", Detalle: '' });
+                //return res.status(status.CONFLICT).json({ Error: 'El paciente ya tiene un usuario asignado' });
               }
               else {
-                return res.status(status.CONFLICT).json({ Error: 'El usuario ya existe' });
+                return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario ya existe", Detalle: '' });
+                //return res.status(status.CONFLICT).json({ Error: 'El usuario ya existe' });
               }
             }
             Usuario.create({ "cNombre": datos.Nombre, "cImagen": datos.Imagen, "nIdPaciente": paciente._id },
               function (error, user) {
                 if (error) {
-                  return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+                  return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+                  // return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
                 }
                 if (!user) {
-                  return res.status(status.CONFLICT).json({ Error: 'Problema al registrar el usuario' });
+                  //return res.status(status.CONFLICT).json({ Error: 'Problema al registrar el usuario' });
+                  return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al registrar el usuario', Detalle: '' });
                 }
-                return res.status(status.OK).json({ "Response": "OK" });
+                //return res.status(status.OK).json({ "Response": "OK" });
+                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+
               });
 
           })
         });
       } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
+        //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.message });
+
       }
     };
   }));
@@ -171,34 +126,52 @@ module.exports = function (wagner) {
   //Actualización de Usuario
   // IN {"Usuario":{"_id":121212, "Nombre" : "LaYare2", "Pin" : "1234", Estado:false}}
   // OUT {Usuario:Usuario}
-  api.post('/user/update', wagner.invoke(function (Usuario) {
+  api.put('/user/update', wagner.invoke(function (Usuario) {
     return function (req, res) {
       try { var datos = req.body.Usuario; }
       catch (e) {
-        return res.status(status.BAD_REQUEST).json({ Error: 'Usuario no especificado!' });
+        //return res.status(status.BAD_REQUEST).json({ Error: 'Usuario no especificado!' });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: e.message });
       }
-      Usuario.findOne({ "cNombre": datos.Nombre, "_id": { "$ne": datos._id } }, function (error, user) {
-        if (error) {
-          return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
-        }
-        if (user) {
-          return res.status(status.CONFLICT).json({ Error: 'El usuario ya existe' });
-        }
-        Usuario.findOneAndUpdate({ "_id": datos._id }, {
-          $set: {
-            'cNombre': datos.Nombre,
-            'cPin': datos.Pin,
-            'bEstado': datos.Estado
-          }
-        }, { runValidators: true }, function (error, user) {
+
+      try {
+        Usuario.findOne({ "cNombre": datos.Nombre, "_id": { "$ne": datos._id } }, function (error, user) {
           if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
           }
-          return res.json({ Usuario: user });
-        })
-      });
+          if (user) {
+            //return res.status(status.CONFLICT).json({ Error: 'El usuario ya existe' });
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario ya existe", Detalle: '' });
+          }
+
+          Usuario.findOneAndUpdate({ "_id": datos._id }, {
+            $set: {
+              'cNombre': datos.Nombre,
+              'bEstado': datos.Estado,
+              'cImagen': datos.Imagen
+            }
+          }, { runValidators: true }, function (error, user) {
+            if (error) {
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+
+            if (!user) {
+              return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el usuario', Detalle: '' });
+              //return res.status(status.BAD_REQUEST).json({ Error: 'El usuario no se actualizó' });
+            }
+            //return res.status(status.OK).json({ "Response": "OK" });  
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+          });
+        });
+      } catch (e) {
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
     }
   }));
+
 
 
 
@@ -248,18 +221,22 @@ module.exports = function (wagner) {
         var datos = req.body.Paciente;
       }
       catch (e) {
-        return res.status(status.BAD_REQUEST).json({ Error: 'Paciente no especificado!' });
+        //return res.status(status.BAD_REQUEST).json({ Error: 'Paciente no especificado!' });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Paciente no especificado', Detalle: e.message });
+
       }
 
       try {
         Paciente.findOne({
-          "oGenerales.cEmail": datos.Generales.Email
+          "oGenerales.cEmail": datos.Generales.Email,
         }, function (error, patient) {
           if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
-          }
+            //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }          
           if (patient) {
-            return res.status(status.CONFLICT).json({ Error: 'El correo ya esta registrado' });
+            //return res.status(status.CONFLICT).json({ Error: 'El correo ya esta registrado' });
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El correo ya esta registrado", Detalle: '' });
           }
 
           Paciente.create({
@@ -281,7 +258,7 @@ module.exports = function (wagner) {
               bAlcohol: datos.Antecedentes.Alcohol,
               bTabaco: datos.Antecedentes.Tabaco,
               bDiabtes: datos.Antecedentes.Diabetes,
-              bHipertension: datos.Antecedentes.Hipertension,
+              bHipotencion: datos.Antecedentes.Hipotencion,
             },
             oExtra: {
               cNotas: datos.Extra.Notas,
@@ -292,51 +269,192 @@ module.exports = function (wagner) {
             }
           }, function (error, paciente) {
             if (error) {
-              return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error });
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error });
+
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo:status.INTERNAL_SERVER_ERROR, Mensaje:"Ha ocurrido un problema", Detalle:error.toString() });
             }
-            return res.status(status.OK).json({ Response: "OK" });//json({ Paciente: paciente });
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: paciente });
+            //return res.status(status.OK).json({ Codigo:status.OK, Mensaje:'Registro exitoso', Detalle: '' });
+            //return res.status(status.OK).json({ Response: "OK" });//json({ Paciente: paciente });
           });
         });
       }
       catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: e.message });
       }
+
     };
   })
   );
 
-  //Actualización de Usuario
-  // IN {"Usuario":{"_id":121212, "Nombre" : "LaYare2", "Pin" : "1234", Estado:false}}
-  // OUT {Usuario:Usuario}
-  // api.post('/user/update', wagner.invoke(function (Usuario) {
-  //   return function (req, res) {
-  //     try { var datos = req.body.Usuario; }
-  //     catch (e) {
-  //       return res.status(status.BAD_REQUEST).json({ error: 'Usuario no especificado!' });
-  //     }
-  //     Usuario.findOne({ "cNombre": datos.Nombre, "_id": { "$ne": datos._id } }, function (error, user) {
-  //       if (error) {
-  //         return res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.toString() });
-  //       }
-  //       if (user) {
-  //         return res.status(status.CONFLICT).json({ error: 'El usuario ya existe' });
-  //       }
 
-  //       Usuario.findOneAndUpdate({ "_id": datos._id }, {
-  //         $set: {
-  //           'cNombre': datos.Nombre,
-  //           'cPin': datos.Pin,
-  //           'bEstado': datos.Estado
-  //         }
-  //       }, { runValidators: true }, function (error, user) {
-  //         if (error) {
-  //           return res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.toString() });
-  //         }
-  //         return res.json({ Usuario: user });
-  //       })
-  //     });
-  //   }
-  // }));
+  api.get('/patient/pin/:id', wagner.invoke(function (Paciente) {
+    return function (req, res) {
+      try {
+        Paciente.findOneAndUpdate({ "_id": req.params.id }, { $set: { "cPin": Token() } },
+          function (error, paciente) {
+            if (error) {
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!paciente)
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Usuario inexistente', Detalle: '' });
+            //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: "Usuario inexistente" });
+
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Pin registrado exitosamente', Detalle: { Pin: paciente.cPin } });
+            //return res.json({ Pin: paciente.cPin });
+          });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+    }
+  }));
+
+  //Consulta Agrega y actualizar la unidad
+  api.get('unity', wagner.invoke(function (Unidad) {
+    return function (req, res) {
+      Unidad.find().exec(handleMany.bind(null, 'Unidad', res));
+    }
+  }));
+
+  api.post('/unity/add', wagner.invoke(function (Unidad) {
+    return function (req, res) {
+      try {
+        var datos = req.body.unidad;
+      }
+      catch (e) {
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Unidad no especificado', Detalle: e.message });
+      }
+      try {
+        Unidad.create(datos, function (error, unidad) {
+          if (error) {
+            //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+
+          if (!unidad) {
+            //return res.status(status.BAD_REQUEST).json({ Error: "La unidad no fue registrada" });
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "La unidad no fue registrada", Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+          //return res.status(status.OK).json({ Response: "OK" });
+        });
+      }
+
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+    }
+  }));
+
+
+  api.put('/unity/update', wagner.invoke(function (Unidad) {
+    return function (req, res) {
+      try {
+        var datos = req.body.unidad;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+
+      try {
+        Unidad.findOneAndUpdate({ "_id": datos.id },
+          {
+            $set:
+            { "cDescripcion": datos.Descripcion, "bMedible": datos.Medible, "cImagen": datos.Imagen }
+          }, function (error, unidad) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            }
+            if (!unidad) {
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'La unidad no existe', Detalle: '' });
+              //return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Actualizacóon exitosa', Detalle: '' });
+            //return res.status(status.OK).json({ Response: "OK" });
+          });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+    }
+  }));
+
+  //Tipo producto
+  api.get('category', wagner.invoke(function (TipoP) {
+    return function (req, res) {
+      TipoP.find().exec(handleMany.bind(null, 'Category', res));
+    }
+  }));
+
+  api.post('/category/add', wagner.invoke(function (TipoP) {
+    return function (req, res) {
+      try {
+        var datos = req.body.unidad;
+      }
+      catch (e) {
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Categoria no especificada', Detalle: e.message });
+
+      }
+      try {
+        TipoP.create(datos, function (error, tipo) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+          }
+
+          if (!tipo) {
+            //return res.status(status.BAD_REQUEST).json({ Error: "La categoria no fue registrada" });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          //return res.status(status.OK).json({ Response: "OK" });
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+        });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+    }
+  }));
+
+
+  api.put('/category/update', wagner.invoke(function (Unidad) {
+    return function (req, res) {
+      try {
+        var datos = req.body.unidad;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+      try {
+        Unidad.findOneAndUpdate({ "_id": datos.id },
+          {
+            $set:
+            { "cDescripcion": datos.Descripcion, "bMedible": datos.Medible, "cImagen": datos.Imagen }
+          }, function (error, unidad) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            }
+            if (!unidad) {
+              return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
+            }
+            return res.status(status.OK).json({ Response: "OK" });
+          });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+    }
+  }));
   return api;
 }
 
@@ -349,15 +467,17 @@ function handleOne(property, res, error, result) {
   if (error) {
     return res.
       status(status.INTERNAL_SERVER_ERROR).
-      json({ error: error.toString() });
+      json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
   }
   if (!result) {
     return res.
       status(status.NOT_FOUND).
-      json({ error: 'Not found' });
+      json({ Codigo: status.NOT_FOUND, Mensaje: "Elemento no encontrado", Detalle: '' });
   }
 
   var json = {};
+  json.Codigo = status.OK;
+  json.Mensaje = 'Operación existosa';
   json[property] = result;
   res.json(json);
 }
@@ -366,9 +486,11 @@ function handleMany(property, res, error, result) {
   if (error) {
     return res.
       status(status.INTERNAL_SERVER_ERROR).
-      json({ error: error.toString() });
+      json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
   }
   var json = {};
+  json.Codigo = status.OK;
+  json.Mensaje = 'Operación existosa';
   json[property] = result;
   res.json(json);
 }

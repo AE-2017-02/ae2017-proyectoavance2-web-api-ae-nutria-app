@@ -5,3 +5,5 @@ var tipoProductoSchema=new mongoose.Schema({
 })
 
 module.exports=tipoProductoSchema;
+
+
