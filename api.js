@@ -233,7 +233,7 @@ module.exports = function (wagner) {
           if (error) {
             //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-          }          
+          }
           if (patient) {
             //return res.status(status.CONFLICT).json({ Error: 'El correo ya esta registrado' });
             return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El correo ya esta registrado", Detalle: '' });
@@ -321,6 +321,20 @@ module.exports = function (wagner) {
     }
   }));
 
+  api.get('/unity/id/:id', wagner.invoke(function (Unidad) {
+    return function (req, res) {
+      Unidad.findOne({ _id: req.params.id }, function (error, unidad) {
+        if (error) {
+          return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+        }
+        if(!unidad){
+          return res.status(status.NOT_FOUND).json({ Codigo:status.NOT_FOUND, Mensaje:'Unidad inexistente', Detalle:''});          
+        }
+        return res.status(status.OK).json({ Codigo:status.OK, Mensaje:'Operación exitosa', Unidad:unidad});
+      });
+    }
+  }));
+  
   api.post('/unity/add', wagner.invoke(function (Unidad) {
     return function (req, res) {
       try {
@@ -331,7 +345,7 @@ module.exports = function (wagner) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Unidad no especificado', Detalle: e.message });
       }
       try {
-        Unidad.create({cDescripcion:datos.Descripcion, bMedible:datos.Medible, cImagen:datos.Imagen}, function (error, unidad) {
+        Unidad.create({ cDescripcion: datos.Descripcion, bMedible: datos.Medible, cImagen: datos.Imagen }, function (error, unidad) {
           if (error) {
             //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
@@ -396,6 +410,22 @@ module.exports = function (wagner) {
     }
   }));
 
+
+api.get('/category/id/:id', wagner.invoke(function (TipoP) {
+    return function (req, res) {
+      TipoP.findOne({ _id: req.params.id }, function (error, categoria) {
+        if (error) {
+          return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+        }
+        if(!categoria){
+          return res.status(status.NOT_FOUND).json({ Codigo:status.NOT_FOUND, Mensaje:'Categoria inexistente', Detalle:''});          
+        }
+        return res.status(status.OK).json({ Codigo:status.OK, Mensaje:'Operación exitosa', Categoria:categoria});
+      });
+    }
+  }));
+
+
   api.post('/category/add', wagner.invoke(function (TipoP) {
     return function (req, res) {
       try {
@@ -407,7 +437,7 @@ module.exports = function (wagner) {
 
       }
       try {
-        TipoP.create({cDescripcion:datos.Descripcion}, function (error, tipo) {
+        TipoP.create({ cDescripcion: datos.Descripcion }, function (error, tipo) {
           if (error) {
             //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
@@ -415,7 +445,7 @@ module.exports = function (wagner) {
 
           if (!tipo) {
             //return res.status(status.BAD_REQUEST).json({ Error: "La categoria no fue registrada" });
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La categoria no fue registrada", Detalle:'' });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La categoria no fue registrada", Detalle: '' });
           }
           //return res.status(status.OK).json({ Response: "OK" });
           return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
@@ -440,8 +470,8 @@ module.exports = function (wagner) {
         TipoP.findOneAndUpdate({ "_id": datos.IdCategoria },
           {
             $set:
-            { "cDescripcion": datos.Descripcion}
-          }, function (error, unidad) {
+            { "cDescripcion": datos.Descripcion }
+          }, function (error, categoria) {
             if (error) {
               //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
               return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
