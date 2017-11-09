@@ -12,7 +12,7 @@ module.exports = function (wagner) {
   //Usuarios
   //Autenticar In {Usuario:{Usuario:"",Pin:""}} 
   //Out IdUsuario IdPaciente
-  api.get('/auth', wagner.invoke(function (Usuario) {
+  api.post('/auth', wagner.invoke(function (Usuario) {
     return function (req, res) {
       try {
         var datos = req.body.Usuario;
@@ -135,7 +135,7 @@ module.exports = function (wagner) {
       }
 
       try {
-        Usuario.findOne({ "cNombre": datos.Nombre, "_id": { "$ne": datos._id } }, function (error, user) {
+        Usuario.findOne({ "cNombre": datos.Nombre, "_id": { "$ne": datos.IdUsuario } }, function (error, user) {
           if (error) {
             //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
@@ -145,7 +145,7 @@ module.exports = function (wagner) {
             return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario ya existe", Detalle: '' });
           }
 
-          Usuario.findOneAndUpdate({ "_id": datos._id }, {
+          Usuario.findOneAndUpdate({ "_id": datos.IdUsuario }, {
             $set: {
               'cNombre': datos.Nombre,
               'bEstado': datos.Estado,
@@ -317,24 +317,34 @@ module.exports = function (wagner) {
   //Consulta Agrega y actualizar la unidad
   api.get('/unity', wagner.invoke(function (Unidad) {
     return function (req, res) {
-      Unidad.find().exec(handleMany.bind(null, 'Unidad', res));
+      try {
+        Unidad.find().exec(handleMany.bind(null, 'Unidad', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
     }
   }));
 
   api.get('/unity/id/:id', wagner.invoke(function (Unidad) {
     return function (req, res) {
-      Unidad.findOne({ _id: req.params.id }, function (error, unidad) {
-        if (error) {
-          return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-        }
-        if(!unidad){
-          return res.status(status.NOT_FOUND).json({ Codigo:status.NOT_FOUND, Mensaje:'Unidad inexistente', Detalle:''});          
-        }
-        return res.status(status.OK).json({ Codigo:status.OK, Mensaje:'Operación exitosa', Unidad:unidad});
-      });
+      try {
+        Unidad.findOne({ _id: req.params.id }, function (error, unidad) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!unidad) {
+            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Unidad inexistente', Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Unidad: unidad });
+        });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
     }
   }));
-  
+
   api.post('/unity/add', wagner.invoke(function (Unidad) {
     return function (req, res) {
       try {
@@ -406,22 +416,32 @@ module.exports = function (wagner) {
   //Tipo producto
   api.get('/category', wagner.invoke(function (TipoP) {
     return function (req, res) {
-      TipoP.find().exec(handleMany.bind(null, 'Categoria', res));
+      try {
+        TipoP.find().exec(handleMany.bind(null, 'Categoria', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
     }
   }));
 
 
-api.get('/category/id/:id', wagner.invoke(function (TipoP) {
+  api.get('/category/id/:id', wagner.invoke(function (TipoP) {
     return function (req, res) {
-      TipoP.findOne({ _id: req.params.id }, function (error, categoria) {
-        if (error) {
-          return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-        }
-        if(!categoria){
-          return res.status(status.NOT_FOUND).json({ Codigo:status.NOT_FOUND, Mensaje:'Categoria inexistente', Detalle:''});          
-        }
-        return res.status(status.OK).json({ Codigo:status.OK, Mensaje:'Operación exitosa', Categoria:categoria});
-      });
+      try {
+        TipoP.findOne({ _id: req.params.id }, function (error, categoria) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!categoria) {
+            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Categoria inexistente', Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Categoria: categoria });
+        });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
     }
   }));
 
@@ -464,7 +484,7 @@ api.get('/category/id/:id', wagner.invoke(function (TipoP) {
         var datos = req.body.Categoria;
       }
       catch (e) {
-        return res.status(status.BAD_REQUEST).json({ Error: e.message });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Categoria no especificada', Detalle: e.message });
       }
       try {
         TipoP.findOneAndUpdate({ "_id": datos.IdCategoria },
@@ -473,22 +493,224 @@ api.get('/category/id/:id', wagner.invoke(function (TipoP) {
             { "cDescripcion": datos.Descripcion }
           }, function (error, categoria) {
             if (error) {
-              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
               return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
-            if (!unidad) {
-              //return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
-              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La unidad no existe", Detalle: '' });
+            if (!categoria) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La categoria no existe", Detalle: '' });
             }
-            //return res.status(status.OK).json({ Response: "OK" });
             return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
           });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  //Producto
+
+  api.get('/product', wagner.invoke(function (Producto) {
+    return function (req, res) {
+      try {
+        Producto.find({})
+          .populate(
+          [
+            { path: "nIdTipo", model: "TipoP", select: { '_id': 0, 'cDescripcion': 1 } }
+            , { path: "nIdUnidad", model: "Unidad", select: { '_id': 0, 'cDescripcion': 1 } }
+          ]
+          )
+          .exec(handleMany.bind(null, 'Producto', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.get('/product/id/:id', wagner.invoke(function (Producto) {
+    return function (req, res) {
+      try {
+        Producto.findOne({ _id: req.params.id }, function (error, producto) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!producto) {
+            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Producto inexistente', Detalle: '' });
+          }
+        }).populate([{
+          path: "nIdTipo", model: "TipoP", select: {
+            '_id': 0, 'cDescripcion': 1
+          }
+        }, {
+          path: "nIdUnidad", model: "Unidad", select: {
+            '_id': 0, 'cDescripcion': 1
+          }
+        }]).exec(handleOne.bind(null, 'Producto', res));
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.post('/product/add', wagner.invoke(function (Producto) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Producto;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Producto no especificado', Detalle: e.message });
+      }
+      try {
+        Producto.create(
+          {
+            cDescripcion: datos.Descripcion, cImagen: datos.Imagen,
+            nCalorias: datos.Calorias, nIdTipo: datos.Categoria, nIdUnidad: datos.Unidad
+          }, function (error, producto) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+
+            if (!producto) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "El producto no fue registrado", Detalle: '' });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+          });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.put('/product/update', wagner.invoke(function (Producto) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Producto;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Producto no especificado', Detalle: e.message });
+      }
+      try {
+        Producto.findOneAndUpdate({ "_id": datos.IdProducto }, {
+          $set: {
+            "cDescripcion": datos.Descripcion,
+            "cImagen": datos.Imagen,
+            "nCalorias": datos.Calorias,
+            "nIdTipo": datos.Categoria,
+            "nIdUnidad": datos.Unidad
+          }
+        }, function (error, producto) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!producto) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el producto', Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+        });
+
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  //TipoMenu
+  api.get('/menuType', wagner.invoke(function (TipoM) {
+    return function (req, res) {
+      try {
+        TipoM.find().exec(handleMany.bind(null, 'Clasificacion', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.get('/menuType/id/:id', wagner.invoke(function (TipoM) {
+    return function (req, res) {
+      try {
+        TipoM.findOne({ _id: req.params.id }, function (error, clasificacion) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!clasificacion) {
+            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Clasificación inexistente', Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Clasificacion: clasificacion });
+        });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.post('/menuType/add', wagner.invoke(function (TipoM) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Clasificacion;
+      }
+      catch (e) {
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Clasificacion no especificada', Detalle: e.message });
+
+      }
+      try {
+        TipoM.create({ cDescripcion: datos.Descripcion }, function (error, tipo) {
+          if (error) {
+            //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+
+          if (!tipo) {
+            //return res.status(status.BAD_REQUEST).json({ Error: "La categoria no fue registrada" });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La clasificacion no fue registrada", Detalle: '' });
+          }
+          //return res.status(status.OK).json({ Response: "OK" });
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+        });
       } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
         //return res.status(status.BAD_REQUEST).json({ Error: e.message });
       }
     }
   }));
+
+
+  api.put('/menuType/update', wagner.invoke(function (TipoM) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Clasificacion;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Clasificacion no especificada', Detalle: e.message });
+      }
+      try {
+        TipoM.findOneAndUpdate({ "_id": datos.IdClasificacion },
+          {
+            $set:
+            { "cDescripcion": datos.Descripcion }
+          }, function (error, clasificacion) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!clasificacion) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La clasificacion no existe", Detalle: '' });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+          });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
   return api;
 }
 

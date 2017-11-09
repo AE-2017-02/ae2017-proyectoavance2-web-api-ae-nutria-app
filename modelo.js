@@ -24,6 +24,7 @@ module.exports=function(wagner){
 		Menu:Menu,
 		Paciente:Paciente,
 		Plan:Plan,
+		Producto:Producto,
 		TipoM:TipoM,
 		TipoP:TipoP,
 		Unidad:Unidad,
