@@ -249,6 +249,7 @@ module.exports = function (wagner) {
               cSexo: datos.Generales.Sexo,
               cEmail: datos.Generales.Email,
               cTelefono: datos.Generales.Telefono,
+              bEstado:datos.Estado,
               dFechaNac: new Date(datos.Generales.FechaNac)
             },
             oAntecedentes: {
