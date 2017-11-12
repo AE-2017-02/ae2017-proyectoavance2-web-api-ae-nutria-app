@@ -71,7 +71,8 @@ module.exports = function (wagner) {
         var Paciente = mongoose.model('Paciente', require('./Schemas/paciente'), 'paciente');
         Paciente.findOne({
           "cPin": datos.Pin,
-          "oGenerales.cEmail": datos.Email
+          "oGenerales.cEmail": datos.Email,
+          "bEstado":true
         }, function (error, paciente) {
           if (error) {
             //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
@@ -911,6 +912,43 @@ module.exports = function (wagner) {
         }
       });
       return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+    }
+  }));
+
+//Administradores
+api.post('/auth2', wagner.invoke(function (Administrador) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Usuario;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: e.message });
+      }
+
+      try {
+        // Administrador.find({}).exec(handleMany.bind(null,'d',res));
+        // console.log(datos);
+        Administrador.findOne(
+          { "Usuario": datos.Usuario, "Estado": true, "Password":datos.Password }, function (error, user) {
+            console.log(user);
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!user) {
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Usuario inexistente', Detalle: '' });
+            }                        
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: user });
+          });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Problema al autenticar", Detalle: e.message });
+      }
+    };
+  }));
+
+
+  api.get('/administrador', wagner.invoke(function (Administrador) {
+    return function (req, res) {
+      Administrador.find().exec(handleMany.bind(null, 'Usuarios', res))
     }
   }));
 

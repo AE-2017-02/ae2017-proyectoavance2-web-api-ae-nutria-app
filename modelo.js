@@ -16,6 +16,7 @@ module.exports=function(wagner){
 	var TipoP=mongoose.model('TipoP',require('./Schemas/tipoProducto'),'tipoProducto');
 	var Unidad=mongoose.model('Unidad',require('./Schemas/unidadMedida'),'unidad');
 	var Usuario=mongoose.model('Usuario',require('./Schemas/usuario'),'usuario');
+	var Administrador=mongoose.model('Administrador',require('./Schemas/administrador'),'administrador');
 		
 	//Modelos a utilizar
 	var modelos={
@@ -28,7 +29,8 @@ module.exports=function(wagner){
 		TipoM:TipoM,
 		TipoP:TipoP,
 		Unidad:Unidad,
-		Usuario:Usuario				
+		Usuario:Usuario,
+		Administrador:Administrador			
 	};
 	//Inyeccion de dependencias, 
 	//donde se agrupan todos los modelos
