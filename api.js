@@ -242,14 +242,14 @@ module.exports = function (wagner) {
 
           Paciente.create({
             cPin: Token(),
+            bEstado:datos.Estado,
             oGenerales: {
               cNombre: datos.Generales.Nombre,
               cApellidoP: datos.Generales.ApellidoP,
               cApellidoM: datos.Generales.ApellidoM,
               cSexo: datos.Generales.Sexo,
               cEmail: datos.Generales.Email,
-              cTelefono: datos.Generales.Telefono,
-              bEstado:datos.Estado,
+              cTelefono: datos.Generales.Telefono,              
               dFechaNac: new Date(datos.Generales.FechaNac)
             },
             oAntecedentes: {
