@@ -72,7 +72,7 @@ module.exports = function (wagner) {
         Paciente.findOne({
           "cPin": datos.Pin,
           "oGenerales.cEmail": datos.Email,
-          "bEstado":true
+          "bEstado": true
         }, function (error, paciente) {
           if (error) {
             //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
@@ -183,6 +183,46 @@ module.exports = function (wagner) {
     }
   }));
 
+  api.get('/patientw', wagner.invoke(function (Usuario) {
+    return function (req, res) {
+      try {
+        Usuario.find().select({ cNombre: 1, cImagen: 1 }).populate({
+          path: "nIdPaciente", model: "Paciente", select: {
+            'oGenerales.cNombre': 1, 'oGenerales.nEdad': 1, '_id': 1, 'NombreComplete': 1
+          }
+        }).exec(handleMany.bind(null, 'Pacientes', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  // //Regresa Nombre Paciente, Edad Imagen Id
+
+  api.get('/patient/id/:id', wagner.invoke(function (Usuario) {
+    return function (req, res) {
+      try {
+        Usuario.findOne({ nIdPaciente: req.params.id }, function (error, usuario) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!usuario) {
+            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Paciente: usuario });
+        }).select({ cImagen: 1 }).populate({
+          path: "nIdPaciente", model: "Paciente",
+        })
+
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
 
   /*IN 
     {
@@ -242,14 +282,14 @@ module.exports = function (wagner) {
 
           Paciente.create({
             cPin: Token(),
-            bEstado:datos.Estado,
+            bEstado: datos.Estado,
             oGenerales: {
               cNombre: datos.Generales.Nombre,
               cApellidoP: datos.Generales.ApellidoP,
               cApellidoM: datos.Generales.ApellidoM,
               cSexo: datos.Generales.Sexo,
               cEmail: datos.Generales.Email,
-              cTelefono: datos.Generales.Telefono,              
+              cTelefono: datos.Generales.Telefono,
               dFechaNac: new Date(datos.Generales.FechaNac)
             },
             oAntecedentes: {
@@ -290,6 +330,71 @@ module.exports = function (wagner) {
     };
   })
   );
+
+  api.put('/patientw/update', wagner.invoke(function (Paciente) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Paciente;
+      }
+      catch (e) {
+        //return res.status(status.BAD_REQUEST).json({ Error: 'Paciente no especificado!' });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Paciente no especificado', Detalle: e.message });
+      }
+
+      try {
+        console.log(datos);
+        Paciente.findOneAndUpdate({
+          "_id": datos.IdPaciente,
+        }, {
+            $set: {
+              "oGenerales": {
+                "cNombre": datos.Generales.Nombre,
+                "cApellidoP": datos.Generales.ApellidoP,
+                "cApellidoM": datos.Generales.ApellidoM,
+                "cSexo": datos.Generales.Sexo,
+                "cEmail": datos.Generales.Email,
+                "cTelefono": datos.Generales.Telefono,
+              },
+              "oAntecedentes": {
+                "nPesoHabitual": datos.Antecedentes.PesoHabitual,
+                "bObesidadFamiliar": datos.Antecedentes.ObesidadFamiliar,
+                "bColesterol": datos.Antecedentes.Colesterol,
+                "bHipertension": datos.Antecedentes.Hipertension,
+                "bAlcohol": datos.Antecedentes.Alcohol,
+                "bTabaco": datos.Antecedentes.Tabaco,
+                "bDiabtes": datos.Antecedentes.Diabetes,
+                "bHipotencion": datos.Antecedentes.Hipotencion,
+              },
+              "oExtra": {
+                "cNotas": datos.Extra.Notas,
+                "cPatologia": datos.Extra.Patologia,
+                "cAlergia": datos.Extra.Alergia,
+                "cMedicamentos": datos.Extra.Medicamentos,
+                "cMeta": datos.Extra.Meta
+              }
+            }
+          }, function (error, paciente) {
+            console.log(error);
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            }
+            if (!paciente) {
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'El paciente no existe', Detalle: '' });
+              //return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Actualizacóon exitosa', Detalle: '' });
+          }
+        )
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });        
+      }
+
+    };
+  })
+  );
+
 
 
   api.get('/patient/pin/:id', wagner.invoke(function (Paciente) {
@@ -540,6 +645,7 @@ module.exports = function (wagner) {
           if (!producto) {
             return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Producto inexistente', Detalle: '' });
           }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operacion Exitosa', Producto: producto });
         }).populate([{
           path: "nIdTipo", model: "TipoP", select: {
             '_id': 0, 'cDescripcion': 1
@@ -548,7 +654,7 @@ module.exports = function (wagner) {
           path: "nIdUnidad", model: "Unidad", select: {
             '_id': 0, 'cDescripcion': 1
           }
-        }]).exec(handleOne.bind(null, 'Producto', res));
+        }])//.exec(handleOne.bind(null, 'Producto', res));
       } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
       }
@@ -756,16 +862,16 @@ module.exports = function (wagner) {
           [
             {
               path: "nIdTipoMenu", model: "TipoM", select: {
-                'cDescripcion': 1, '_id': 0
+                'cDescripcion': 1, '_id': 1
               },
             },
             {
               path: "oComida.nIdProducto", model: "Producto", select: {
-                'cDescripcion': 1, '_id': 0
+                'cDescripcion': 1, '_id': 1, 'nCalorias': 1
               }
             }
-          ]).exec(handleOne.bind(null,"Menu",res));
-          
+          ]).exec(handleOne.bind(null, "Menu", res));
+
       }
       catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
@@ -892,7 +998,7 @@ module.exports = function (wagner) {
   }));
 
   //Eliminar producto
-  api.delete('/menu/food/delete', wagner.invoke(function (Menu) {
+  api.post('/menu/food/delete', wagner.invoke(function (Menu) {
     return function (req, res) {
       try {
         var datos = req.body.Porcion;
@@ -916,8 +1022,8 @@ module.exports = function (wagner) {
     }
   }));
 
-//Administradores
-api.post('/auth2', wagner.invoke(function (Administrador) {
+  //Administradores
+  api.post('/auth2', wagner.invoke(function (Administrador) {
     return function (req, res) {
       try {
         var datos = req.body.Usuario;
@@ -930,14 +1036,14 @@ api.post('/auth2', wagner.invoke(function (Administrador) {
         // Administrador.find({}).exec(handleMany.bind(null,'d',res));
         // console.log(datos);
         Administrador.findOne(
-          { "Usuario": datos.Usuario, "Estado": true, "Password":datos.Password }, function (error, user) {
+          { "Usuario": datos.Usuario, "Estado": true, "Password": datos.Password }, function (error, user) {
             console.log(user);
             if (error) {
               return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
             if (!user) {
               return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Usuario inexistente', Detalle: '' });
-            }                        
+            }
             return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: user });
           });
       } catch (e) {
@@ -953,155 +1059,155 @@ api.post('/auth2', wagner.invoke(function (Administrador) {
     }
   }));
 
-  api.put('/patient/update', wagner.invoke(function(Paciente){
-    return function(req, res){
-      try{
+  api.put('/patient/update', wagner.invoke(function (Paciente) {
+    return function (req, res) {
+      try {
         var datos = req.body.Paciente;
-      }catch(e){
-        return res.status(status.BAD_REQUEST).json({Codigo:status.BAD_REQUEST, Mensaje: 'Paciente no especificado', Detalle: e.message});
+      } catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Paciente no especificado', Detalle: e.message });
       }
 
-      try{
-        Paciente.findOne({"_id":datos.IdPaciente}, function(error, patient){
-          if(error){
-            return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo:status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: error.toString()});
+      try {
+        Paciente.findOne({ "_id": datos.IdPaciente }, function (error, patient) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: error.toString() });
           }
-          if(!patient){
-            return res.status(status.CONFLICT).json({Codigo:status.CONFLICT, Mensaje: 'Problema al actualizar el paciente', Detalle: '' });
+          if (!patient) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el paciente', Detalle: '' });
           }
 
-          Paciente.findOneAndUpdate({"_id":datos.IdPaciente},{
+          Paciente.findOneAndUpdate({ "_id": datos.IdPaciente }, {
             $set: {
-              'bEstado': !patient.bEstado  
+              'bEstado': !patient.bEstado
             }
-          }, {runValidators: true} , function(error, patient){
-            if(error){
-              return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo:status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: error.toString()});
+          }, { runValidators: true }, function (error, patient) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: error.toString() });
             }
-            if(!patient){
-              return res.status(status.CONFLICT).json({Codigo:status.CONFLICT, Mensaje: 'Problema al actualizar el paciente', Detalle: '' });
+            if (!patient) {
+              return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el paciente', Detalle: '' });
             }
 
-            return res.status(status.OK).json({Codigo:status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
           });
-          });
+        });
 
-      }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo:status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: e.message });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: e.message });
       }
     }
   }));
 
 
-  api.post('/foodplan/add', wagner.invoke(function(Plan){
-    return function(req, res){
-      try{
+  api.post('/foodplan/add', wagner.invoke(function (Plan) {
+    return function (req, res) {
+      try {
         var datos = req.body.Plan;
-      }catch(e){
-        return res.status(status.BAD_REQUEST).json({Codigo: status.BAD_REQUEST, Mensaje: "Plan no valido", Detalle: e.message});
-      }  
+      } catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: "Plan no valido", Detalle: e.message });
+      }
 
-      try{
+      try {
         Plan.create({
           nIdPaciente: datos.IdPaciente,
           oPlan: datos.Plan
-        }, function(error, plan){
-          if(error){
-            return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: error.toString()});
+        }, function (error, plan) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: error.toString() });
           }
-          if(!plan){
-            return res.status(status.CONFLICT).json({Codigo: status.CONFLICT, Mensaje: "Problema al crear el plan", Detalle: ""});
+          if (!plan) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "Problema al crear el plan", Detalle: "" });
           }
-          return res.status(status.OK).json({Codigo: status.OK, Mensaje: "Se inserto el plan alimenticio", Detalle: ""});
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se inserto el plan alimenticio", Detalle: "" });
         });
-      }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message});
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
       }
     }
   }));
 
 
-  api.put('/plan/add', wagner.invoke(function(Plan){
-    return function(req, res){
-      try{
+  api.put('/plan/add', wagner.invoke(function (Plan) {
+    return function (req, res) {
+      try {
         var datos = req.body.Plan;
-      }catch(e){
-        return res.status(status.BAD_REQUEST).json({Codigo: status.BAD_REQUEST, Mensaje: "Plan no valido", Detalle: e.message});
+      } catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: "Plan no valido", Detalle: e.message });
       }
 
-      try{
-        
-        Plan.findOne({"nIdPaciente": datos.IdPaciente}, function(error, plan){
-          if(error){
-            return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: e.message});     
+      try {
+
+        Plan.findOne({ "nIdPaciente": datos.IdPaciente }, function (error, plan) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: e.message });
           }
-          if(!plan){
-            return res.status(status.CONFLICT).json({Codigo: status.CONFLICT, Mensaje: "No se pudo agregar el plan", Detalle: ""}); 
+          if (!plan) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se pudo agregar el plan", Detalle: "" });
           }
 
           plan.oPlan.push({
             "nIdMenu": datos.IdMenu,
             "nHora": datos.Hora
           });
-          try{
+          try {
             plan.save();
-          }catch(e){
-            return res.status(status.CONFLICT).json({Codigo: status.CONFLICT, Mensaje: "No se pudo agregar el plan", Detalle: e.message});   
+          } catch (e) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se pudo agregar el plan", Detalle: e.message });
           }
-          return res.status(status.OK).json({Codigo: status.OK, Mensaje: "Se agrego el plan", Detalle: ""}); 
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se agrego el plan", Detalle: "" });
         });
-        
 
-      }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message}); 
+
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
       }
     }
   }));
 
-  api.delete('/foodplan/delete',wagner.invoke(function(Plan){
-    return function(req, res){
-      try{
+  api.delete('/foodplan/delete', wagner.invoke(function (Plan) {
+    return function (req, res) {
+      try {
         var datos = req.body.Plan;
-      }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message});   
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
       }
-      try{
-        Plan.deleteOne({"_id": datos.IdPlan}, function(error, plan){
-          if(error){
-            return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: e.message}); 
+      try {
+        Plan.deleteOne({ "_id": datos.IdPlan }, function (error, plan) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: e.message });
           }
-          if(!plan){
-            return res.status(status.CONFLICT).json({Codigo: status.CONFLICT, Mensaje: "No se pudo borrar el plan alimenticio", Detalle: ""}); 
+          if (!plan) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se pudo borrar el plan alimenticio", Detalle: "" });
           }
-          return res.status(status.OK).json({Codigo: status.OK, Mensaje: "Se borro el plan", Detalle: ""}); 
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se borro el plan", Detalle: "" });
         });
-      } catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message});   
-      } 
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+      }
     }
   }));
 
 
-  api.delete('/plan/delete',wagner.invoke(function(Plan){
-    return function(req, res){
-      try{
+  api.delete('/plan/delete', wagner.invoke(function (Plan) {
+    return function (req, res) {
+      try {
         var datos = req.body.Plan;
-      }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message});   
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
       }
-      try{
-        Plan.findOneAndUpdate({"nIdPaciente": datos.IdPaciente}, { $pull: { "oPlan": { "nIdMenu" : datos.IdMenu } } }, function(error, plan){
-          if(error){
-            return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: e.message}); 
+      try {
+        Plan.findOneAndUpdate({ "nIdPaciente": datos.IdPaciente }, { $pull: { "oPlan": { "nIdMenu": datos.IdMenu } } }, function (error, plan) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: e.message });
           }
-          if(!plan){
-            return res.status(status.CONFLICT).json({Codigo: status.CONFLICT, Mensaje: "No se pudo borrar el plan", Detalle: ""}); 
+          if (!plan) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se pudo borrar el plan", Detalle: "" });
           }
-          return res.status(status.OK).json({Codigo: status.OK, Mensaje: "Se borro el plan", Detalle: ""}); 
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se borro el plan", Detalle: "" });
         });
-      } catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message});   
-      } 
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+      }
     }
   }));
 
