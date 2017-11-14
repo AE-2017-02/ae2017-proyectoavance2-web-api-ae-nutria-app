@@ -7,7 +7,8 @@ var productoSchema=new mongoose.Schema({
     nCalorias:{type:Number},
     nIdTipo:{type:mongoose.Schema.Types.ObjectId},
     nIdUnidad:{type:mongoose.Schema.Types.ObjectId},            
-    dBaja:{type:Date}
+    dBaja:{type:Date},
+    bEstado: { type: Boolean, default: true}
 });
 
 productoSchema.plugin(uniqueValidator);

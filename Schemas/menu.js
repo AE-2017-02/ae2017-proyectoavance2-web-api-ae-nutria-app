@@ -8,7 +8,8 @@ var menuSchema=new mongoose.Schema({
         nIdProducto:{type:mongoose.Schema.Types.ObjectId},
         nCantidad:{type:Number,required:true},
         nCalorias:{type:Number}
-    }]
+    }],
+    bEstado:{ type: Boolean, default: true}
 });
 
 menuSchema.virtual('nSuma').get(function(){

@@ -509,7 +509,43 @@ module.exports = function (wagner) {
               return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'La unidad no existe', Detalle: '' });
               //return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
             }
-            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Actualizacóon exitosa', Detalle: '' });
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Actualización exitosa', Detalle: '' });
+            //return res.status(status.OK).json({ Response: "OK" });
+          });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+    }
+  }));
+
+
+  api.delete('/unity/delete', wagner.invoke(function(Unidad){
+    return function (req, res) {
+      try {
+        var datos = req.body.Unidad;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+
+      try {
+        Unidad.findOneAndUpdate({ "_id": datos.IdUnidad },
+          {
+            $set:
+            { "bEstado": false}
+          }, function (error, unidad) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            }
+            if (!unidad) {
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'La unidad no existe', Detalle: '' });
+              //return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'La unidad ha sido borrado exitosamente', Detalle: '' });
             //return res.status(status.OK).json({ Response: "OK" });
           });
       }
@@ -685,6 +721,36 @@ module.exports = function (wagner) {
             }
             return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
           });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.delete('/product/delete', wagner.invoke(function(Producto){
+    return function (req, res) {
+      try {
+        var datos = req.body.Producto;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Producto no especificado', Detalle: e.message });
+      }
+
+      try {
+        Producto.findOneAndUpdate({ "_id": datos.IdProducto }, {
+          $set: {
+            "bEstado": false
+          }
+        }, function (error, producto) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!producto) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al borar el producto', Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Producto borrado exitosamente', Detalle: '' });
+        });
       } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
       }
@@ -929,6 +995,29 @@ module.exports = function (wagner) {
     }
   }));
 
+  api.delete('/menu/delete', wagner.invoke(function(Menu){
+    return function(req, res){
+      try{
+        var datos = req.body.Menu;
+      }catch(e){
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Menú no especificado', Detalle: e.message });
+      }
+
+      try{
+        Menu.findOneAndUpdate({ "_id": datos.IdMenu }, { $set:{ "bEstado": false }}, function(error, menu){
+          if(error){
+            return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString()});
+          }
+          if(!menu){
+            return res.status(status.CONFLICT).json({Codigo: status.CONFLICT, Mensaje: "Ha ocurrido un problema", Detalle: ""});
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Menú borrado exitosamente', Detalle: '' });
+        });
+      }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
 
   api.put('/menu/update', wagner.invoke(function (Menu) {
     return function (req, res) {
