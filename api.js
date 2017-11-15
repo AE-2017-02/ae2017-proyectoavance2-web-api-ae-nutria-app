@@ -13,7 +13,7 @@ module.exports = function (wagner) {
   //Autenticar In {Usuario:{Usuario:"",Pin:""}} 
   //Out IdUsuario IdPaciente
   api.post('/auth', wagner.invoke(function (Usuario) {
-    return function (req, res) {
+      return function (req, res) {
       try {
         var datos = req.body.Usuario;
       }
@@ -157,7 +157,6 @@ module.exports = function (wagner) {
               //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
               return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
-
             if (!user) {
               return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el usuario', Detalle: '' });
               //return res.status(status.BAD_REQUEST).json({ Error: 'El usuario no se actualizó' });
@@ -341,8 +340,7 @@ module.exports = function (wagner) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Paciente no especificado', Detalle: e.message });
       }
 
-      try {
-        console.log(datos);
+      try {       
         Paciente.findOneAndUpdate({
           "_id": datos.IdPaciente,
         }, {
@@ -917,13 +915,14 @@ module.exports = function (wagner) {
     return function (req, res) {
       try {
         Menu.findOne({ _id: req.params.id }, function (error, menu) {
-          if (error) {
+          /*if (error) {
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
           }
           if (!menu) {
             return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Menu inexistente', Detalle: '' });
-          }
+          }*/
           //return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Menu: menu });
+        //}
         }).populate(
           [
             {
@@ -933,7 +932,7 @@ module.exports = function (wagner) {
             },
             {
               path: "oComida.nIdProducto", model: "Producto", select: {
-                'cDescripcion': 1, '_id': 1, 'nCalorias': 1
+                'cDescripcion': 1, '_id': 1, 'nCalorias': 1,'cImagen':1
               }
             }
           ]).exec(handleOne.bind(null, "Menu", res));
@@ -974,6 +973,7 @@ module.exports = function (wagner) {
 
       }
       try {
+        console.log(datos);
         Menu.create({
           cNombre: datos.Nombre,
           nIdTipoMenu: datos.IdTipoMenu,
@@ -1188,6 +1188,24 @@ module.exports = function (wagner) {
   }));
 
 
+
+
+api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
+    return function (req, res) {
+      try {
+        
+        Plan.findOne({ nIdPaciente: req.params.id }).select('nIdMenu').sort({ dCreacion: -1 }).populate(
+              {path: "oPlan.nIdMenu", model: "Menu"}
+        ).exec(handleMany.bind(null, 'Menu',res));                        
+      }      
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+
   api.post('/foodplan/add', wagner.invoke(function (Plan) {
     return function (req, res) {
       try {
@@ -1245,8 +1263,6 @@ module.exports = function (wagner) {
           }
           return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se agrego el plan", Detalle: "" });
         });
-
-
       } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
       }
@@ -1312,7 +1328,7 @@ function handleOne(property, res, error, result) {
   if (error) {
     return res.
       status(status.INTERNAL_SERVER_ERROR).
-      json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.message });
   }
   if (!result) {
     return res.
@@ -1331,7 +1347,7 @@ function handleMany(property, res, error, result) {
   if (error) {
     return res.
       status(status.INTERNAL_SERVER_ERROR).
-      json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.message });
   }
   var json = {};
   json.Codigo = status.OK;
@@ -1339,5 +1355,6 @@ function handleMany(property, res, error, result) {
   json[property] = result;
   res.json(json);
 }
+
 
 
