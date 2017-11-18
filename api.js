@@ -1301,13 +1301,20 @@ api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
       }
       try {
-        Plan.findOneAndUpdate({ "nIdPaciente": datos.IdPaciente }, { $pull: { "oPlan": { "nIdMenu": datos.IdMenu } } }, function (error, plan) {
+        Plan.findOne({ "nIdPaciente": datos.IdPaciente }, function (error, plan) {
           if (error) {
             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: e.message });
           }
           if (!plan) {
             return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se pudo borrar el plan", Detalle: "" });
           }
+          var indice = plan.oPlan.findIndex(x => x.nIdMenu == datos.IdMenu);
+          plan.oPlan.splice(indice, 1);
+          plan.save(function(er){
+            if(er){
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString()});              
+            }
+          });
           return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se borro el plan", Detalle: "" });
         });
       } catch (e) {
