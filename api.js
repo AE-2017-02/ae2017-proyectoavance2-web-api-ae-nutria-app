@@ -1196,8 +1196,9 @@ api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
         
         Plan.findOne({ nIdPaciente: req.params.id }).select('nIdMenu').sort({ dCreacion: -1 }).populate(
               {path: "oPlan.nIdMenu", model: "Menu", 
-              populate: {path: "oComida.nIdProducto", model: "Producto",select:{"cDescripcion":1,"_id":0}}, 
-              populate: {path: "nIdTipoMenu", model: "TipoM", select:{"cDescripcion":1,"_id":0}}}
+              populate: [{path: "oComida.nIdProducto", model: "Producto",select:{"cDescripcion":1,"_id":0}}, 
+              {path: "nIdTipoMenu", model: "TipoM", select:{"cDescripcion":1,"_id":0}}]
+            }
         ).exec(handleMany.bind(null, 'Menu',res));                        
       }      
       catch (e) {
