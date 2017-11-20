@@ -2,7 +2,7 @@ var mongoose=require('mongoose');
 
 var avanceSchema=new mongoose.Schema({    
     nIdPaciente:{type:mongoose.Schema.Types.ObjectId},        
-    dFecha:{type:Date, required:true,default:new Date()},
+    dCreacion:{type:Date, required:true,default:new Date()},
     oCircuferencia:{
         nBrazo:{type:Number, default:0},
         nBContraido:{type:Number,default:0},
@@ -23,16 +23,10 @@ var avanceSchema=new mongoose.Schema({
         nMuslo:{type:Number,default:0},
         nPantorilla:{type:Number,default:0}
     }    
+
 });
 
-avanceSchema.virtual('nPliegues1').get(function(){
-  var sumatoria=0;
-  sumatoria=this.oPliegues.nTripicial+
-    this.oPliegues.nEscapular+
-    this.oPliegues.nBicipital+
-    this.oPliegues.nSiliaco;
-  return isNaN(sumatoria)?0:sumatoria;
-});
+
 
 avanceSchema.virtual('nPliegues2').get(function(){
   var sumatoria=0;
@@ -41,6 +35,15 @@ avanceSchema.virtual('nPliegues2').get(function(){
     this.oPliegues.nMuslo+
     this.oPliegues.nPantorilla;
   return isNaN(sumatoria)?0:sumatoria;
+});
+
+avanceSchema.virtual('nPliegues3').get(function(){
+  var sumatoria2=0;
+  sumatoria2=this.oPliegues.nTripicial +
+    this.oPliegues.nEscapular +
+    this.oPliegues.nBicipital +
+    this.oPliegues.nIliaco;
+  return isNaN(sumatoria2)?0:sumatoria2;
 });
 
 avanceSchema.set('toObject',{virtuals:true});

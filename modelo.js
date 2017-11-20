@@ -32,7 +32,8 @@ module.exports=function(wagner){
 		Unidad:Unidad,
 		Usuario:Usuario,
 		Administrador:Administrador,
-		Notificacion:Notificacion
+		Notificacion:Notificacion,
+		Avance:Avance			
 	};
 	//Inyeccion de dependencias, 
 	//donde se agrupan todos los modelos
