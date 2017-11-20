@@ -17,12 +17,13 @@ module.exports=function(wagner){
 	var Unidad=mongoose.model('Unidad',require('./Schemas/unidadMedida'),'unidad');
 	var Usuario=mongoose.model('Usuario',require('./Schemas/usuario'),'usuario');
 	var Administrador=mongoose.model('Administrador',require('./Schemas/administrador'),'administrador');
-		
+	var Notificacion=mongoose.model('Notificacion',require('./Schemas/notificacion'),'notificacion');
 	//Modelos a utilizar
 	var modelos={
 		//nombre:Variable asociada al esquema-bd		
 		Cita:Cita,
 		Menu:Menu,
+		Avance:Avance,
 		Paciente:Paciente,
 		Plan:Plan,
 		Producto:Producto,
@@ -30,7 +31,8 @@ module.exports=function(wagner){
 		TipoP:TipoP,
 		Unidad:Unidad,
 		Usuario:Usuario,
-		Administrador:Administrador			
+		Administrador:Administrador,
+		Notificacion:Notificacion
 	};
 	//Inyeccion de dependencias, 
 	//donde se agrupan todos los modelos

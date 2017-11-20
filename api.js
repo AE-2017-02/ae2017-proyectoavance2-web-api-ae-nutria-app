@@ -13,7 +13,7 @@ module.exports = function (wagner) {
   //Autenticar In {Usuario:{Usuario:"",Pin:""}} 
   //Out IdUsuario IdPaciente
   api.post('/auth', wagner.invoke(function (Usuario) {
-      return function (req, res) {
+    return function (req, res) {
       try {
         var datos = req.body.Usuario;
       }
@@ -59,6 +59,7 @@ module.exports = function (wagner) {
     }
   }));
 
+  //Crea una cuenta a un usuario
   api.post('/user/add', wagner.invoke(function (Usuario, Paciente) {
     return function (req, res) {
       try {
@@ -174,7 +175,6 @@ module.exports = function (wagner) {
 
 
 
-
   //Regresa todos los pacientes Out [Paciente:{}]
   api.get('/patient', wagner.invoke(function (Paciente) {
     return function (req, res) {
@@ -182,12 +182,20 @@ module.exports = function (wagner) {
     }
   }));
 
+  //Regresa todas las solicitudes
+  api.get('/applicant', wagner.invoke(function (Paciente) {
+    return function (req, res) {
+      Paciente.find({ "bEstado": false }).exec(handleMany.bind(null, 'Solicitante', res))
+    }
+  }));
+
+  //Regresa todos los pacientes para la interfaz web
   api.get('/patientw', wagner.invoke(function (Usuario) {
     return function (req, res) {
       try {
         Usuario.find().select({ cNombre: 1, cImagen: 1 }).populate({
           path: "nIdPaciente", model: "Paciente", select: {
-            'oGenerales.cNombre': 1, 'oGenerales.nEdad': 1, '_id': 1, 'NombreComplete': 1
+            'oGenerales.cNombre': 1, 'oGenerales.nEdad': 1, '_id': 1, 'NombreComplete': 1, 'bEstado': 1
           }
         }).exec(handleMany.bind(null, 'Pacientes', res));
       }
@@ -198,7 +206,7 @@ module.exports = function (wagner) {
   }));
 
   // //Regresa Nombre Paciente, Edad Imagen Id
-
+  //Retorna un paciente de acuerdo a su id
   api.get('/patient/id/:id', wagner.invoke(function (Usuario) {
     return function (req, res) {
       try {
@@ -330,6 +338,7 @@ module.exports = function (wagner) {
   })
   );
 
+  //Actualiza un paciente desde la aplicacion web
   api.put('/patientw/update', wagner.invoke(function (Paciente) {
     return function (req, res) {
       try {
@@ -340,7 +349,7 @@ module.exports = function (wagner) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Paciente no especificado', Detalle: e.message });
       }
 
-      try {       
+      try {
         Paciente.findOneAndUpdate({
           "_id": datos.IdPaciente,
         }, {
@@ -372,7 +381,6 @@ module.exports = function (wagner) {
               }
             }
           }, function (error, paciente) {
-            console.log(error);
             if (error) {
               return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
               //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
@@ -386,7 +394,7 @@ module.exports = function (wagner) {
         )
       }
       catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });        
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
       }
 
     };
@@ -394,7 +402,7 @@ module.exports = function (wagner) {
   );
 
 
-
+  //Actualiza el token y retorna el nuevo pin
   api.get('/patient/pin/:id', wagner.invoke(function (Paciente) {
     return function (req, res) {
       try {
@@ -419,6 +427,32 @@ module.exports = function (wagner) {
     }
   }));
 
+
+  //Permite cambiar el estado de un paciente 
+  api.put('/patient/state/:id', wagner.invoke(function (Paciente) {
+    return function (req, res) {
+      try {
+        Paciente.findOneAndUpdate({ "_id": req.params.id }, { $set: { "bEstado": true } },
+          function (error, paciente) {
+            if (error) {
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!paciente)
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });
+            //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: "Usuario inexistente" });
+
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Paciente registrado exitosamente', Detalle: { Paciente: paciente } });
+            //return res.json({ Pin: paciente.cPin });
+          });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+    }
+  }));
+
   //Consulta Agrega y actualizar la unidad
   api.get('/unity', wagner.invoke(function (Unidad) {
     return function (req, res) {
@@ -431,6 +465,7 @@ module.exports = function (wagner) {
     }
   }));
 
+  //Busca una unidad por id
   api.get('/unity/id/:id', wagner.invoke(function (Unidad) {
     return function (req, res) {
       try {
@@ -450,6 +485,7 @@ module.exports = function (wagner) {
     }
   }));
 
+  //Agrega una unidad
   api.post('/unity/add', wagner.invoke(function (Unidad) {
     return function (req, res) {
       try {
@@ -519,7 +555,7 @@ module.exports = function (wagner) {
   }));
 
 
-  api.delete('/unity/delete', wagner.invoke(function(Unidad){
+  api.delete('/unity/delete', wagner.invoke(function (Unidad) {
     return function (req, res) {
       try {
         var datos = req.body.Unidad;
@@ -533,7 +569,7 @@ module.exports = function (wagner) {
         Unidad.findOneAndUpdate({ "_id": datos.IdUnidad },
           {
             $set:
-            { "bEstado": false}
+            { "bEstado": false }
           }, function (error, unidad) {
             if (error) {
               return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
@@ -648,6 +684,41 @@ module.exports = function (wagner) {
   }));
 
 
+  api.delete('/category/delete', wagner.invoke(function (TipoP) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Categoria;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Categoria no especificada', Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+
+      try {
+        TipoP.findOneAndUpdate({ "_id": datos.IdCategoria },
+          {
+            $set:
+            { "bEstado": false }
+          }, function (error, categoria) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+              //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
+            }
+            if (!categoria) {
+              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'La categoria no existe', Detalle: '' });
+              //return res.status(status.BAD_REQUEST).json({ Error: "La unidad no existe" });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'La categoria ha sido borrado exitosamente', Detalle: '' });
+            //return res.status(status.OK).json({ Response: "OK" });
+          });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+        //return res.status(status.BAD_REQUEST).json({ Error: e.message });
+      }
+    }
+  }));
+
   //Producto
 
   api.get('/product', wagner.invoke(function (Producto) {
@@ -726,7 +797,7 @@ module.exports = function (wagner) {
   }));
 
 
-  api.delete('/product/delete', wagner.invoke(function(Producto){
+  api.delete('/product/delete', wagner.invoke(function (Producto) {
     return function (req, res) {
       try {
         var datos = req.body.Producto;
@@ -884,13 +955,12 @@ module.exports = function (wagner) {
 
 
   //Menu
-
-
+  //Retorna los menu activos
   api.get('/menu', wagner.invoke(function (Menu) {
     return function (req, res) {
       try {
 
-        Menu.find().populate(
+        Menu.find({ "bEstado": true }).populate(
           [
             {
               path: "nIdTipoMenu", model: "TipoM", select: {
@@ -922,7 +992,7 @@ module.exports = function (wagner) {
             return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Menu inexistente', Detalle: '' });
           }*/
           //return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Menu: menu });
-        //}
+          //}
         }).populate(
           [
             {
@@ -932,7 +1002,7 @@ module.exports = function (wagner) {
             },
             {
               path: "oComida.nIdProducto", model: "Producto", select: {
-                'cDescripcion': 1, '_id': 1, 'nCalorias': 1,'cImagen':1
+                'cDescripcion': 1, '_id': 1, 'nCalorias': 1, 'cImagen': 1
               }
             }
           ]).exec(handleOne.bind(null, "Menu", res));
@@ -944,24 +1014,25 @@ module.exports = function (wagner) {
     }
   }));
 
-  api.get('/menu/food/:id', wagner.invoke(function (Menu) {
-    return function (req, res) {
-      try {
-        Menu.findOne({ _id: req.params.id }, function (error, menu) {
-          if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-          }
-          if (!clasificacion) {
-            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Menu inexistente', Detalle: '' });
-          }
-          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Comida: menu.oComida });
-        });
-      }
-      catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
-      }
-    }
-  }));
+  //Metodo desconocid
+  // api.get('/menu/food/:id', wagner.invoke(function (Menu) {
+  //   return function (req, res) {
+  //     try {
+  //       Menu.findOne({ _id: req.params.id }, function (error, menu) {
+  //         if (error) {
+  //           return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+  //         }
+  //         if (!menu) {
+  //           return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Menu inexistente', Detalle: '' });
+  //         }
+  //         return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Comida: menu.oComida });
+  //       });
+  //     }
+  //     catch (e) {
+  //       return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+  //     }
+  //   }
+  // }));
 
   api.post('/menu/add', wagner.invoke(function (Menu) {
     return function (req, res) {
@@ -969,11 +1040,10 @@ module.exports = function (wagner) {
         var datos = req.body.Menu;
       }
       catch (e) {
-        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Clasificacion no especificada', Detalle: e.message });
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Menu no especificado', Detalle: e.message });
 
       }
       try {
-        console.log(datos);
         Menu.create({
           cNombre: datos.Nombre,
           nIdTipoMenu: datos.IdTipoMenu,
@@ -995,25 +1065,25 @@ module.exports = function (wagner) {
     }
   }));
 
-  api.delete('/menu/delete', wagner.invoke(function(Menu){
-    return function(req, res){
-      try{
+  api.delete('/menu/delete', wagner.invoke(function (Menu) {
+    return function (req, res) {
+      try {
         var datos = req.body.Menu;
-      }catch(e){
+      } catch (e) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Menú no especificado', Detalle: e.message });
       }
 
-      try{
-        Menu.findOneAndUpdate({ "_id": datos.IdMenu }, { $set:{ "bEstado": false }}, function(error, menu){
-          if(error){
-            return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString()});
+      try {
+        Menu.findOneAndUpdate({ "_id": datos.IdMenu }, { $set: { "bEstado": false } }, function (error, menu) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
           }
-          if(!menu){
-            return res.status(status.CONFLICT).json({Codigo: status.CONFLICT, Mensaje: "Ha ocurrido un problema", Detalle: ""});
+          if (!menu) {
+            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "Ha ocurrido un problema", Detalle: "" });
           }
           return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Menú borrado exitosamente', Detalle: '' });
         });
-      }catch(e){
+      } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
       }
     }
@@ -1095,19 +1165,32 @@ module.exports = function (wagner) {
       catch (e) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Producto no especificado', Detalle: e.message });
       }
+      //Plan.findOneAndUpdate(
+      //{ "nIdPaciente": datos.IdPaciente }, { $pull: { "oPlan": { "nIdMenu": datos.IdMenu } } }, function (error, plan) {
 
-      Menu.findOne({ _id: datos.IdMenu }, function (error, menu) {
-        var indice = menu.oComida.findIndex(x => x.nIdProducto == datos.IdProducto);
-        if (indice != -1) {
-          menu.oComida.splice(indice, 1);
-          menu.save(function (error) {
-            if (error) {
-              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-            }
-          });
-        }
-      });
-      return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+      Menu.findOneAndUpdate(
+        { _id: datos.IdMenu }, { $pull: { "oComida": { "nIdProducto": datos.IdProducto } } }
+        , function (error, menu) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!menu) {
+            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Menu inexistente', Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+        });
+      // Menu.findOne({ _id: datos.IdMenu }, function (error, menu) {
+      //   var indice = menu.oComida.findIndex(x => x.nIdProducto == datos.IdProducto);
+      //   if (indice != -1) {
+      //     menu.oComida.splice(indice, 1);
+      //     menu.save(function (error) {
+      //       if (error) {
+      //         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+      //       }
+      //     });
+      //   }
+      // });
+      // return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
     }
   }));
 
@@ -1148,56 +1231,56 @@ module.exports = function (wagner) {
     }
   }));
 
-  api.put('/patient/update', wagner.invoke(function (Paciente) {
+  // api.put('/patient/update', wagner.invoke(function (Paciente) {
+  //   return function (req, res) {
+  //     try {
+  //       var datos = req.body.Paciente;
+  //     } catch (e) {
+  //       return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Paciente no especificado', Detalle: e.message });
+  //     }
+
+  //     try {        
+  //       Paciente.findOne({ "_id": datos.IdPaciente }, function (error, patient) {
+
+  //         if (error) {
+  //           return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: error.toString() });
+  //         }
+  //         if (!patient) {
+  //           return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el paciente', Detalle: '' });
+  //         }
+
+  //         Paciente.findOneAndUpdate({ "_id": datos.IdPaciente }, {
+  //           $set: {
+  //             'bEstado': !patient.bEstado
+  //           }
+  //         }, { runValidators: true }, function (error, patient2) {
+  //           if (error) {
+  //             console.log(patient2.bEstado);
+  //             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: error.toString() });
+  //           }
+  //           if (!patient2) {
+  //             return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el paciente', Detalle: '' });
+  //           }
+  //           return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+  //         });
+  //       });
+
+  //     } catch (e) {
+  //       return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: e.message });
+  //     }
+  //   }
+  // }));
+
+
+  //Regresa el ultimo plan alimenticio asignado a un paciente
+  api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
     return function (req, res) {
       try {
-        var datos = req.body.Paciente;
-      } catch (e) {
-        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Paciente no especificado', Detalle: e.message });
-      }
 
-      try {
-        Paciente.findOne({ "_id": datos.IdPaciente }, function (error, patient) {
-          if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: error.toString() });
-          }
-          if (!patient) {
-            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el paciente', Detalle: '' });
-          }
-
-          Paciente.findOneAndUpdate({ "_id": datos.IdPaciente }, {
-            $set: {
-              'bEstado': !patient.bEstado
-            }
-          }, { runValidators: true }, function (error, patient) {
-            if (error) {
-              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: error.toString() });
-            }
-            if (!patient) {
-              return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al actualizar el paciente', Detalle: '' });
-            }
-
-            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
-          });
-        });
-
-      } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: 'Ha ocurrido un problema', Detalle: e.message });
-      }
-    }
-  }));
-
-
-
-
-api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
-    return function (req, res) {
-      try {
-        
         Plan.findOne({ nIdPaciente: req.params.id }).select('nIdMenu').sort({ dCreacion: -1 }).populate(
-              {path: "oPlan.nIdMenu", model: "Menu"}
-        ).exec(handleMany.bind(null, 'Menu',res));                        
-      }      
+          { path: "oPlan.nIdMenu", model: "Menu" }
+        ).exec(handleMany.bind(null, 'Menu', res));
+      }
       catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
       }
@@ -1205,7 +1288,7 @@ api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
   }));
 
 
-
+  //Agrega  un nuevo plan alimenticio
   api.post('/foodplan/add', wagner.invoke(function (Plan) {
     return function (req, res) {
       try {
@@ -1233,7 +1316,7 @@ api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
     }
   }));
 
-
+  //Actualiza permite agregar un menu al plan alimenticio
   api.put('/plan/add', wagner.invoke(function (Plan) {
     return function (req, res) {
       try {
@@ -1269,6 +1352,7 @@ api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
     }
   }));
 
+  //Elimina un menu del plan alimenticio
   api.delete('/foodplan/delete', wagner.invoke(function (Plan) {
     return function (req, res) {
       try {
@@ -1287,7 +1371,7 @@ api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
           return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se borro el plan", Detalle: "" });
         });
       } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
       }
     }
   }));
@@ -1303,7 +1387,7 @@ api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
       try {
         Plan.findOneAndUpdate({ "nIdPaciente": datos.IdPaciente }, { $pull: { "oPlan": { "nIdMenu": datos.IdMenu } } }, function (error, plan) {
           if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: e.message });
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
           }
           if (!plan) {
             return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se pudo borrar el plan", Detalle: "" });
@@ -1311,7 +1395,370 @@ api.get('/foodplan/patient/:id', wagner.invoke(function (Plan) {
           return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se borro el plan", Detalle: "" });
         });
       } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  //Retorna todos los avance de un paciente, pero solamente la fecha e Id
+  api.get('/advance/:id', wagner.invoke(function (Avance) {
+    return function (req, res) {
+      try {
+        Avance.find({ "nIdPaciente": req.params.id }).sort({ "dFecha": -1 }).select({ "dFecha": 1 }).exec(handleMany.bind(null, 'Avance', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  //Retorna el avance de un Id en especifico
+  api.get('/advance/id/:id', wagner.invoke(function (Avance) {
+    return function (req, res) {
+      try {
+        Avance.findOne({ _id: req.params.id }, function (error, avance) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!avance) {
+            return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Avance inexistente', Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Avance: avance });
+        });
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  //Permite agregar un avance
+  api.post('/advance/add', wagner.invoke(function (Avance) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Avance;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Avance no especificado', Detalle: e.message });
+      }
+      try {
+        Avance.create({
+          nIdPaciente: datos.IdPaciente,
+          oCircuferencia: {
+            nBrazo: datos.Circuferencia.Brazo,
+            nBContraido: datos.Circuferencia.BContraido,
+            nCintura: datos.Circuferencia.Cintura,
+            nMuslo: datos.Circuferencia.Muslo,
+            nCadera: datos.Circuferencia.Cadera,
+            nPantorrilla: datos.Circuferencia.Pantorilla,
+            nMuneca: datos.Circuferencia.Muneca
+          },
+          oPliegues: {
+            nTripicial: datos.Pliegues.Tripicial,
+            nEscapular: datos.Pliegues.Escapular,
+            nBicipital: datos.Pliegues.Bicipital,
+            nSiliaco: datos.Pliegues.Siliaco,
+
+            nEspinale: datos.Pliegues.Espinale,
+            nAbdominal: datos.Pliegues.Abdominal,
+            nMuslo: datos.Pliegues.Muslo,
+            nPantorilla: datos.Pliegues.Pantorilla,
+          }
+        }, function (error, avance) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+
+          if (!avance) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "El avance no fue registrada", Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+        });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.put('/advance/update', wagner.invoke(function (Avance) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Avance;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Avance no especificado', Detalle: e.message });
+      }
+      try {
+        Avance.findOneAndUpdate({ "_id": datos.IdAvance },
+          {
+            $set:
+            {
+              oCircuferencia: {
+                nBrazo: datos.Circuferencia.Brazo,
+                nBContraido: datos.Circuferencia.BContraido,
+                nCintura: datos.Circuferencia.Cintura,
+                nMuslo: datos.Circuferencia.Muslo,
+                nCadera: datos.Circuferencia.Cadera,
+                nPantorrilla: datos.Circuferencia.Pantorilla,
+                nMuneca: datos.Circuferencia.Muneca
+              },
+              oPliegues: {
+                nTripicial: datos.Pliegues.Tripicial,
+                nEscapular: datos.Pliegues.Escapular,
+                nBicipital: datos.Pliegues.Bicipital,
+                nSiliaco: datos.Pliegues.Siliaco,
+
+                nEspinale: datos.Pliegues.Espinale,
+                nAbdominal: datos.Pliegues.Abdominal,
+                nMuslo: datos.Pliegues.Muslo,
+                nPantorilla: datos.Pliegues.Pantorilla,
+              }
+            }
+          }, function (error, avance) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!avance) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "El avance no existe", Detalle: '' });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+          });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  //Cita  
+
+  //Retorna la cita dada una fecha
+  api.get('/appointment', wagner.invoke(function (Cita) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Parametros;
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Parametros no especificados", Detalle: e.message });
+      }
+      try {
+        var Ini=datos.Inicio.split("/");
+        var Fin=datos.Fin.split("/");
+        
+        var fecIni=new Date(Ini[2], Ini[1] - 1, Ini[0])
+        var fecFin=new Date(Fin[2], Fin[1] - 1, Fin[0])        
+        Cita.find({ "dFecha": { "$gte": fecIni, "$lte": fecFin } }).exec(handleMany.bind(null, 'Citas', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  //Retorna la citas del día
+  api.get('/appointment/day', wagner.invoke(function (Cita) {
+    return function (req, res) {
+      try {
+        Cita.find({ "dFecha": { "$gte": new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()) } }).
+          populate({
+            path: "nIdPaciente", model: "Paciente",
+            select: {
+              'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1,
+              'oGenerales.cApellidoM': 1, "Nombre2": 1
+            }
+          }).exec(handleMany.bind(null, 'Citas', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  //Retorna una cita
+  api.get('/appointment/id/:id', wagner.invoke(function (Cita) {
+    return function (req, res) {
+      try {
+        Cita.find({ "_id": req.params.id }).exec(handleOne.bind(null, "Cita", res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  //Agrega una cita
+  api.post('/appointment/add', wagner.invoke(function (Cita) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Cita;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Cita no especificada', Detalle: e.message });
+      }
+      try {
+        Cita.create({
+          nIdPaciente: datos.IdPaciente,
+          nHora: datos.Hora,
+          cDescripcion: datos.Descripcion
+        }, function (error, cita) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+
+          if (!cita) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La cita no fue registrada", Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+        });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  //Actualiza el estado de una cita
+  api.put('/appointment/state', wagner.invoke(function (Cita) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Cita;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Cita no especificada', Detalle: e.message });
+      }
+      try {
+        Cita.findOneAndUpdate({ "_id": datos.IdCita }, {
+          $set: { "cEstado": datos.Estado }
+        }, function (error, cita) {
+          if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+          }
+          if (!cita) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La cita no existe", Detalle: '' });
+          }
+          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+        });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  api.put('/appointment/update', wagner.invoke(function (Cita) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Cita;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Cita no especificada', Detalle: e.message });
+      }
+      try {
+        var Fecha=datos.Fecha.split("/");        
+        var nFecha=new Date(Fecha[2], Fecha[1] - 1, Fecha[0])
+        Cita.findOneAndUpdate({ "_id": datos.IdCita },
+          {
+            $set:
+            {
+              "dFecha": nFecha,
+              "nHora": datos.Hora,
+              "cEstado": datos.Estado,
+              "cDescripcion": datos.Descripcion
+            }
+          }, function (error, cita) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!cita) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La cita no existe", Detalle: '' });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+          });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.delete('/appointment/:id', wagner.invoke(function (Cita) {
+    return function (req, res) {
+      try {
+        Cita.remove({ _id: req.params.id }, function (err) {
+          if(err)
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: err });
+          return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Cita eliminada", Detalle:'' })
+        });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  //Notificacion
+  //Retorna todas las notificaciones
+  api.get('/notification', wagner.invoke(function (Notificacion) {
+    return function (req, res) {
+      try {
+        Notificacion.find().populate({
+          path: "oPacientes.nIdPaciente", model: "Paciente", select: {
+            'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1,
+            'oGenerales.cApellidoM': 1, "Nombre2": 1
+          }
+        }).exec(handleMany.bind(null, 'Notificacion', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+  //Retorna una notificacion
+  api.get('/notification/id/:id', wagner.invoke(function (Notificacion) {
+    return function (req, res) {
+      try {
+        Notificacion.find({ "_id": req.params.id }).populate({
+          path: "oPacientes.nIdPaciente", model: "Paciente", select: {
+            'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1,
+            'oGenerales.cApellidoM': 1, "Nombre2": 1, "_id": 0,
+          }
+        }).exec(handleOne.bind(null, 'Notificacion', res));
+      }
+      catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+      }
+    }
+  }));
+
+
+  api.post('/notification/add', wagner.invoke(function (Notificacion) {
+    return function (req, res) {
+      try {
+        var datos = req.body.Notificacion;
+      }
+      catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Notificacion no especificada', Detalle: e.message });
+      }
+      try {
+        Notificacion.create(
+          {
+            cTitulo: datos.Titulo,
+            cAsunto: datos.Asunto,
+            cMensaje: datos.Mensaje,
+            oPacientes: datos.Pacientes
+          },
+          function (error, notificacion) {
+            if (error) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!notificacion) {
+              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La notificacion no fue registrada", Detalle: '' });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+          });
+      } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
       }
     }
   }));

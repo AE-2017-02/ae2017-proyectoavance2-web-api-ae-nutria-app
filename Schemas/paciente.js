@@ -37,8 +37,8 @@ var pacienteSchema=new mongoose.Schema({
 });
 
 pacienteSchema.virtual("Nombre2").get(function(){    
-    return (this.oGenerales.cNombre+this.oGenerales.cApellidoP
-    +this.oGenerales.cApellidoM);
+    return (this.oGenerales.cNombre+' '+this.oGenerales.cApellidoP
+    +' '+this.oGenerales.cApellidoM);
 });
 pacienteSchema.set('toObject',{virtuals:true});
 pacienteSchema.set('toJSON',{virtuals:true});
