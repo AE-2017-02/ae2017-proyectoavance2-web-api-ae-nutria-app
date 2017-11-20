@@ -30,7 +30,8 @@ module.exports=function(wagner){
 		TipoP:TipoP,
 		Unidad:Unidad,
 		Usuario:Usuario,
-		Administrador:Administrador			
+		Administrador:Administrador,
+		Avance:Avance			
 	};
 	//Inyeccion de dependencias, 
 	//donde se agrupan todos los modelos
