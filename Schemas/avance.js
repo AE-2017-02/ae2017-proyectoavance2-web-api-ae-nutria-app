@@ -2,7 +2,7 @@ var mongoose=require('mongoose');
 
 var avanceSchema=new mongoose.Schema({    
     nIdPaciente:{type:mongoose.Schema.Types.ObjectId},        
-    dCreacion:{type:Date, required:true,default:new Date()},
+    dCreacion:{type:Date, required:true,default:Date.now},
     oCircuferencia:{
         nBrazo:{type:Number, default:0},
         nBContraido:{type:Number,default:0},
@@ -23,7 +23,6 @@ var avanceSchema=new mongoose.Schema({
         nMuslo:{type:Number,default:0},
         nPantorilla:{type:Number,default:0}
     }    
-
 });
 
 

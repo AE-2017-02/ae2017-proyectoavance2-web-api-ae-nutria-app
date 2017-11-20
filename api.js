@@ -1278,18 +1278,12 @@ module.exports = function (wagner) {
       try {
 
         Plan.findOne({ nIdPaciente: req.params.id }).select('nIdMenu').sort({ dCreacion: -1 }).populate(
-<<<<<<< HEAD
-          { path: "oPlan.nIdMenu", model: "Menu" }
-        ).exec(handleMany.bind(null, 'Menu', res));
-      }
-=======
-              {path: "oPlan.nIdMenu", model: "Menu", 
+            { path: "oPlan.nIdMenu", model: "Menu", 
               populate: [{path: "oComida.nIdProducto", model: "Producto",select:{"cDescripcion":1,"_id":0}}, 
               {path: "nIdTipoMenu", model: "TipoM", select:{"cDescripcion":1,"_id":0}}]
             }
         ).exec(handleMany.bind(null, 'Menu',res));                        
       }      
->>>>>>> f8e6880a1a0b3cea019eb887e4d7df0584a64dae
       catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
       }
@@ -1420,7 +1414,7 @@ module.exports = function (wagner) {
   api.get('/advance/:id', wagner.invoke(function (Avance) {
     return function (req, res) {
       try {
-        Avance.find({ "nIdPaciente": req.params.id }).sort({ "dFecha": -1 }).select({ "dFecha": 1 }).exec(handleMany.bind(null, 'Avance', res));
+        Avance.find({ "nIdPaciente": req.params.id }).sort({ "dCreacion": -1 }).exec(handleMany.bind(null, 'Avance', res));
       }
       catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
@@ -1779,63 +1773,8 @@ module.exports = function (wagner) {
     }
   }));
 
-  api.get('/advances/patient/:id', wagner.invoke(function(Avance){
-    return function(req, res){
-      Avance.find({nIdPaciente: req.params.id}, function(error, avance){
-        if(error){
-          return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: error.toString() });  
-        }
-        if(!avance){
-          return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se encontro el paciente", Detalle: "" });
-        }
-        return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Operación exitosa", Detalle: avance });
-      }).sort({"dCreacion":-1});
-    }
-  }));
 
-
-  api.post('/advances/add', wagner.invoke(function(Avance){
-    return function(req, res){
-      try {
-        var datos = req.body.Avance;
-      } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
-      }
-
-      try {
-   
-
-        Avance.create({
-          "nIdPaciente": datos.IdPaciente,
-          "oCircuferencia.nBrazo":datos.Brazo,
-          "oCircuferencia.nBContraido":datos.Contraido,
-          "oCircuferencia.nCintura":datos.Cintura,
-          "oCircuferencia.nMuslo":datos.Muslo,
-          "oCircuferencia.nCadera":datos.Cadera,
-          "oCircuferencia.nPantorrilla":datos.Pantorilla,
-          "oCircuferencia.nMuneca":datos.Muneca,
-          "oPliegues.nTripicial":datos.Tripicial,
-          "oPliegues.nEscapular":datos.Escapular,
-          "oPliegues.nBicipital":datos.Bicipital,
-          "oPliegues.nIliaco":datos.Iliaco,
-          "oPliegues.nEspinale":datos.Espinale,
-          "oPliegues.nAbdominal":datos.Abdominal,
-          "oPliegues.nMuslo":datos.PMuslo,
-          "oPliegues.nPantorilla":datos.PPantorilla
-        }, function (error, avance) {
-          if (error) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un error", Detalle: error.toString() });
-          }
-          if (!avance) {
-            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "Problema al crear el avance", Detalle: "" });
-          }
-          return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se inserto el avance", Detalle: "" });
-        });
-      } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
-      }
-    }
-  }));
+  
 
   return api;
 }
