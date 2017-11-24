@@ -36,7 +36,7 @@ module.exports = function (wagner) {
             return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: user });
           }).select({ cNombre: 1, cImagen: 1 }).populate({
             path: "nIdPaciente", model: "Paciente", select: {
-              'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1
+              'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1, "cSexo":1, "oGenerales.dFechaNac":1
             }
           });
       } catch (e) {
@@ -360,7 +360,7 @@ module.exports = function (wagner) {
                 "cApellidoM": datos.Generales.ApellidoM,
                 "cSexo": datos.Generales.Sexo,
                 "cEmail": datos.Generales.Email,
-                "cTelefono": datos.Generales.Telefono,
+                "cTelefono": datos.Generales.Telefono
               },
               "oAntecedentes": {
                 "nPesoHabitual": datos.Antecedentes.PesoHabitual,
@@ -406,7 +406,8 @@ module.exports = function (wagner) {
   api.get('/patient/pin/:id', wagner.invoke(function (Paciente) {
     return function (req, res) {
       try {
-        Paciente.findOneAndUpdate({ "_id": req.params.id }, { $set: { "cPin": Token() } },
+        var nuevoP = Token();
+        Paciente.findOneAndUpdate({ "_id": req.params.id }, { $set: { "cPin": nuevoP } },
           function (error, paciente) {
             if (error) {
               //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: error.toString() });
@@ -416,7 +417,7 @@ module.exports = function (wagner) {
               return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Usuario inexistente', Detalle: '' });
             //return res.status(status.INTERNAL_SERVER_ERROR).json({ Error: "Usuario inexistente" });
 
-            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Pin registrado exitosamente', Detalle: { Pin: paciente.cPin } });
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Pin registrado exitosamente', Detalle: { Pin: nuevoP } });
             //return res.json({ Pin: paciente.cPin });
           });
       }
@@ -1454,6 +1455,8 @@ module.exports = function (wagner) {
       try {
         Avance.create({
           nIdPaciente: datos.IdPaciente,
+          nPeso: datos.Peso,
+          nTalla: datos.Talla,
           oCircuferencia: {
             nBrazo: datos.Circuferencia.Brazo,
             nBContraido: datos.Circuferencia.BContraido,
@@ -1504,25 +1507,27 @@ module.exports = function (wagner) {
           {
             $set:
             {
-              oCircuferencia: {
-                nBrazo: datos.Circuferencia.Brazo,
-                nBContraido: datos.Circuferencia.BContraido,
-                nCintura: datos.Circuferencia.Cintura,
-                nMuslo: datos.Circuferencia.Muslo,
-                nCadera: datos.Circuferencia.Cadera,
-                nPantorrilla: datos.Circuferencia.Pantorilla,
-                nMuneca: datos.Circuferencia.Muneca
+              "nPeso": datos.Peso,
+              "nTalla":datos.Talla,
+              "oCircuferencia": {
+                "nBrazo": datos.Circuferencia.Brazo,
+                "nBContraido": datos.Circuferencia.BContraido,
+                "nCintura": datos.Circuferencia.Cintura,
+                "nMuslo": datos.Circuferencia.Muslo,
+                "nCadera": datos.Circuferencia.Cadera,
+                "nPantorrilla": datos.Circuferencia.Pantorilla,
+                "nMuneca": datos.Circuferencia.Muneca
               },
-              oPliegues: {
-                nTripicial: datos.Pliegues.Tripicial,
-                nEscapular: datos.Pliegues.Escapular,
-                nBicipital: datos.Pliegues.Bicipital,
-                nSiliaco: datos.Pliegues.Siliaco,
+              "oPliegues": {
+                "nTripicial": datos.Pliegues.Tripicial,
+                "nEscapular": datos.Pliegues.Escapular,
+                "nBicipital": datos.Pliegues.Bicipital,
+                "nSiliaco": datos.Pliegues.Siliaco,
 
-                nEspinale: datos.Pliegues.Espinale,
-                nAbdominal: datos.Pliegues.Abdominal,
-                nMuslo: datos.Pliegues.Muslo,
-                nPantorilla: datos.Pliegues.Pantorilla,
+                "nEspinale": datos.Pliegues.Espinale,
+                "nAbdominal": datos.Pliegues.Abdominal,
+                "nMuslo": datos.Pliegues.Muslo,
+                "nPantorilla": datos.Pliegues.Pantorilla,
               }
             }
           }, function (error, avance) {

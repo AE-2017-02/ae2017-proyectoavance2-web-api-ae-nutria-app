@@ -10,12 +10,7 @@ var pacienteSchema=new mongoose.Schema({
         cSexo: {type: String,required: true},
         cEmail:{type:String, maxlength:100,required:true,match:/^[_a-zA-Z0-9-]+(.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(.[a-zA-Z0-9-]+)*(.[a-zA-Z]{2,4})$/},
         cTelefono:{type:String,maxlength:20,required:true,match:/^[0-9-]+([0-9-]+)$/},
-        dFechaNac:{type:Date,required:true,set:function(v){
-            var fecha=new Date(v);            
-            this.oGenerales.nEdad= new Date().getFullYear() - fecha.getFullYear();                        
-            return fecha;
-        }},
-        nEdad:{type:Number}
+        dFechaNac:{type:Date,required:true}
     },
     oAntecedentes:{
         nPesoHabitual:{type:Number},
@@ -40,6 +35,17 @@ pacienteSchema.virtual("Nombre2").get(function(){
     return (this.oGenerales.cNombre+' '+this.oGenerales.cApellidoP
     +' '+this.oGenerales.cApellidoM);
 });
+
+pacienteSchema.virtual("oGenerales.nEdad").get(function(){
+    var nacimiento = this.oGenerales.dFechaNac;
+    var actual = new Date();
+    var edad = actual.getUTCFullYear() - nacimiento.getUTCFullYear();
+    if(nacimiento.getUTCMonth() >= actual.getUTCMonth() && nacimiento.getUTCDate() > actual.getUTCDate()){
+        edad--;
+    }
+    return edad;
+});
+
 pacienteSchema.set('toObject',{virtuals:true});
 pacienteSchema.set('toJSON',{virtuals:true});
 module.exports=pacienteSchema;   

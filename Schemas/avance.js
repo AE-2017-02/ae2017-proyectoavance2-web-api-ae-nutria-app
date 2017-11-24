@@ -3,6 +3,8 @@ var mongoose=require('mongoose');
 var avanceSchema=new mongoose.Schema({    
     nIdPaciente:{type:mongoose.Schema.Types.ObjectId},        
     dCreacion:{type:Date, required:true,default:Date.now},
+    nPeso:{type:Number},
+    nTalla:{type:Number},
     oCircuferencia:{
         nBrazo:{type:Number, default:0},
         nBContraido:{type:Number,default:0},
@@ -17,31 +19,37 @@ var avanceSchema=new mongoose.Schema({
         nEscapular:{type:Number,default:0},        
         nBicipital:{type:Number,default:0},        
         nSiliaco:{type:Number,default:0},        
-
-        nEspinale:{type:Number,default:0},
+        nEspinale:{type:Number, default:0},
         nAbdominal:{type:Number,default:0},
         nMuslo:{type:Number,default:0},
         nPantorilla:{type:Number,default:0}
-    }    
+    }  
+    
 });
 
 
 
-avanceSchema.virtual('nPliegues2').get(function(){
+avanceSchema.virtual('oPliegues.nSumatoriaCuatro').get(function(){
   var sumatoria=0;
-  sumatoria=this.oPliegues.nEspinale+
-    this.oPliegues.nEspinale+
-    this.oPliegues.nMuslo+
-    this.oPliegues.nPantorilla;
+  sumatoria=this.oPliegues.nTripicial +
+  this.oPliegues.nEscapular +
+  this.oPliegues.nBicipital +
+  this.oPliegues.nSiliaco;
   return isNaN(sumatoria)?0:sumatoria;
+
+  
 });
 
-avanceSchema.virtual('nPliegues3').get(function(){
+avanceSchema.virtual('oPliegues.nSumatoriaOcho').get(function(){
   var sumatoria2=0;
   sumatoria2=this.oPliegues.nTripicial +
-    this.oPliegues.nEscapular +
-    this.oPliegues.nBicipital +
-    this.oPliegues.nIliaco;
+  this.oPliegues.nEscapular +
+  this.oPliegues.nBicipital +
+  this.oPliegues.nSiliaco +
+  this.oPliegues.nEspinale +
+  this.oPliegues.nAbdominal +
+  this.oPliegues.nMuslo +
+  this.oPliegues.nPantorilla;
   return isNaN(sumatoria2)?0:sumatoria2;
 });
 
