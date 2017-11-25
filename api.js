@@ -36,7 +36,7 @@ module.exports = function (wagner) {
             return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: user });
           }).select({ cNombre: 1, cImagen: 1 }).populate({
             path: "nIdPaciente", model: "Paciente", select: {
-              'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1, "cSexo":1, "oGenerales.dFechaNac":1
+              'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1, "oGenerales.cSexo":1, "oGenerales.dFechaNac":1
             }
           });
       } catch (e) {
