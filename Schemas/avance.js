@@ -5,7 +5,7 @@ var avanceSchema=new mongoose.Schema({
     dCreacion:{type:Date, required:true,default:Date.now},
     nPeso:{type:Number},
     nTalla:{type:Number},
-    oCircuferencia:{
+    oCircunferencias:{
         nBrazo:{type:Number, default:0},
         nBContraido:{type:Number,default:0},
         nCintura:{type:Number,default:0},
