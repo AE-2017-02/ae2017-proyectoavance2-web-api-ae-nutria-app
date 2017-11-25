@@ -49,7 +49,7 @@ avanceSchema.virtual('oPliegues.nSumatoriaOcho').get(function(){
   this.oPliegues.nEspinale +
   this.oPliegues.nAbdominal +
   this.oPliegues.nMuslo +
-  this.oPliegues.nPantorilla;
+  this.oPliegues.nPantorrilla;
   return isNaN(sumatoria2)?0:sumatoria2;
 });
 
