@@ -22,7 +22,7 @@ var avanceSchema=new mongoose.Schema({
         nEspinale:{type:Number, default:0},
         nAbdominal:{type:Number,default:0},
         nMuslo:{type:Number,default:0},
-        nPantorilla:{type:Number,default:0}
+        nPantorrilla:{type:Number,default:0}
     }  
     
 });

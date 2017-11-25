@@ -1475,7 +1475,7 @@ module.exports = function (wagner) {
             nEspinale: datos.Pliegues.Espinale,
             nAbdominal: datos.Pliegues.Abdominal,
             nMuslo: datos.Pliegues.Muslo,
-            nPantorilla: datos.Pliegues.Pantorilla,
+            nPantorrilla: datos.Pliegues.Pantorilla,
           }
         }, function (error, avance) {
           if (error) {
@@ -1509,7 +1509,7 @@ module.exports = function (wagner) {
             {
               "nPeso": datos.Peso,
               "nTalla":datos.Talla,
-              "oCircuferencia": {
+              "oCircunferencias": {
                 "nBrazo": datos.Circuferencia.Brazo,
                 "nBContraido": datos.Circuferencia.BContraido,
                 "nCintura": datos.Circuferencia.Cintura,
@@ -1527,7 +1527,7 @@ module.exports = function (wagner) {
                 "nEspinale": datos.Pliegues.Espinale,
                 "nAbdominal": datos.Pliegues.Abdominal,
                 "nMuslo": datos.Pliegues.Muslo,
-                "nPantorilla": datos.Pliegues.Pantorilla,
+                "nPantorrilla": datos.Pliegues.Pantorilla,
               }
             }
           }, function (error, avance) {
