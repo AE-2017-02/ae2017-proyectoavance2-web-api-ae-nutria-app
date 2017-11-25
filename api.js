@@ -1467,7 +1467,7 @@ module.exports = function (wagner) {
             nMuneca: datos.Circuferencia.Muneca
           },
           oPliegues: {
-            nTripicial: datos.Pliegues.Tripicial,
+            nTricipital: datos.Pliegues.Tripicial,
             nEscapular: datos.Pliegues.Escapular,
             nBicipital: datos.Pliegues.Bicipital,
             nSiliaco: datos.Pliegues.Siliaco,
@@ -1519,7 +1519,7 @@ module.exports = function (wagner) {
                 "nMuneca": datos.Circuferencia.Muneca
               },
               "oPliegues": {
-                "nTripicial": datos.Pliegues.Tripicial,
+                "nTricipital": datos.Pliegues.Tripicial,
                 "nEscapular": datos.Pliegues.Escapular,
                 "nBicipital": datos.Pliegues.Bicipital,
                 "nSiliaco": datos.Pliegues.Siliaco,

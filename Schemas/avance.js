@@ -15,7 +15,7 @@ var avanceSchema=new mongoose.Schema({
         nMuneca:{type:Number,default:0}        
     },
     oPliegues:{
-        nTripicial:{type:Number,default:0},        
+        nTricipital:{type:Number,default:0},        
         nEscapular:{type:Number,default:0},        
         nBicipital:{type:Number,default:0},        
         nSiliaco:{type:Number,default:0},        
