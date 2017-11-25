@@ -1457,7 +1457,7 @@ module.exports = function (wagner) {
           nIdPaciente: datos.IdPaciente,
           nPeso: datos.Peso,
           nTalla: datos.Talla,
-          oCircuferencia: {
+          oCircunferencias: {
             nBrazo: datos.Circuferencia.Brazo,
             nBContraido: datos.Circuferencia.BContraido,
             nCintura: datos.Circuferencia.Cintura,
