@@ -31,7 +31,7 @@ var avanceSchema=new mongoose.Schema({
 
 avanceSchema.virtual('oPliegues.nSumatoriaCuatro').get(function(){
   var sumatoria=0;
-  sumatoria=this.oPliegues.nTripicial +
+  sumatoria=this.oPliegues.nTricipital +
   this.oPliegues.nEscapular +
   this.oPliegues.nBicipital +
   this.oPliegues.nSiliaco;
@@ -42,7 +42,7 @@ avanceSchema.virtual('oPliegues.nSumatoriaCuatro').get(function(){
 
 avanceSchema.virtual('oPliegues.nSumatoriaOcho').get(function(){
   var sumatoria2=0;
-  sumatoria2=this.oPliegues.nTripicial +
+  sumatoria2=this.oPliegues.nTricipital +
   this.oPliegues.nEscapular +
   this.oPliegues.nBicipital +
   this.oPliegues.nSiliaco +
