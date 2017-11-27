@@ -8,4 +8,5 @@ var notificacionSchema=new mongoose.Schema({
     dFecha:{type:Date,required:true, default:new Date()}    
 });
 
-module.exports=notificacionSchema;   
+//module.exports=notificacionSchema;   
+module.exports=mongoose.model('Notificacion',notificacionSchema,'notificacion');

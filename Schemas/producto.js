@@ -12,4 +12,6 @@ var productoSchema=new mongoose.Schema({
 });
 
 productoSchema.plugin(uniqueValidator);
-module.exports=productoSchema;
+//module.exports=productoSchema;
+module.exports=mongoose.model('Producto',productoSchema,'producto');
+	

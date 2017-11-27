@@ -9,4 +9,7 @@ var planAlimenticioSchema=new mongoose.Schema({
         nHora:{type:Number,required:true},        
         }]    
 });
-module.exports=planAlimenticioSchema;   
+//module.exports=planAlimenticioSchema;   
+
+module.exports=mongoose.model('Plan',planAlimenticioSchema,'plan');	
+	

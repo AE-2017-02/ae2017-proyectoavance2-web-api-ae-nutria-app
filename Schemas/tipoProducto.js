@@ -7,6 +7,9 @@ var tipoProductoSchema=new mongoose.Schema({
 })
 
 tipoProductoSchema.plugin(uniqueValidator);
-module.exports=tipoProductoSchema;
+//module.exports=tipoProductoSchema;
+
+module.exports=mongoose.model('Categoria',tipoProductoSchema,'tipoProducto');
+	
 
 

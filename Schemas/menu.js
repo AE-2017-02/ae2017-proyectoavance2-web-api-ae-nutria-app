@@ -22,4 +22,7 @@ menuSchema.virtual('nSuma').get(function(){
 
 menuSchema.set('toObject',{virtuals:true});
 menuSchema.set('toJSON',{virtuals:true});
-module.exports=menuSchema;   
+//module.exports=menuSchema;   
+
+module.exports=mongoose.model('Menu',menuSchema,'menu');
+	

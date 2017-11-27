@@ -56,4 +56,6 @@ avanceSchema.virtual('oPliegues.nSumatoriaOcho').get(function(){
 avanceSchema.set('toObject',{virtuals:true});
 avanceSchema.set('toJSON',{virtuals:true});
 
-module.exports=avanceSchema;
+//module.exports=avanceSchema;
+module.export=mongoose.model('Avance',avanceSchema,'avance');
+	

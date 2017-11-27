@@ -9,4 +9,6 @@ var usuarioSchema=new mongoose.Schema({
 });
 
 usuarioSchema.plugin(uniqueValidator);
-module.exports=usuarioSchema;
+//module.exports=usuarioSchema;
+module.exports = mongoose.model('Administrador', usuarioSchema,'administrador')
+

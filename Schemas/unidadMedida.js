@@ -9,4 +9,6 @@ var unidadMedidadSchema=new mongoose.Schema({
 })
 
 unidadMedidadSchema.plugin(uniqueValidator);
-module.exports=unidadMedidadSchema;
+//module.exports=unidadMedidadSchema;
+module.exports=mongoose.model('Unidad',unidadMedidadSchema,'unidad');
+	

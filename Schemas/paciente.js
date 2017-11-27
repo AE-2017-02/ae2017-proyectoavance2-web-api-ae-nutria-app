@@ -39,13 +39,19 @@ pacienteSchema.virtual("Nombre2").get(function(){
 pacienteSchema.virtual("oGenerales.nEdad").get(function(){
     var nacimiento = this.oGenerales.dFechaNac;
     var actual = new Date();
-    var edad = actual.getUTCFullYear() - nacimiento.getUTCFullYear();
-    if(nacimiento.getUTCMonth() >= actual.getUTCMonth() && nacimiento.getUTCDate() > actual.getUTCDate()){
+    var edad=0;
+    if(nacimiento!=undefined){
+        edad = actual.getUTCFullYear() - nacimiento.getUTCFullYear();
+    }    
+    /*if(nacimiento.getUTCMonth() >= actual.getUTCMonth() && nacimiento.getUTCDate() > actual.getUTCDate()){
         edad--;
-    }
+    }*/
     return edad;
 });
 
 pacienteSchema.set('toObject',{virtuals:true});
 pacienteSchema.set('toJSON',{virtuals:true});
-module.exports=pacienteSchema;   
+//module.exports=pacienteSchema;   
+module.exports=mongoose.model('Paciente',pacienteSchema,'paciente');
+
+	

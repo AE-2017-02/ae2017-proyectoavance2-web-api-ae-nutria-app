@@ -9,4 +9,6 @@ var citaSchema=new mongoose.Schema({
 });
 
 
-module.exports=citaSchema;
+//module.exports=citaSchema;
+
+module.exports=mongoose.model('Cita',citaSchema,'cita');

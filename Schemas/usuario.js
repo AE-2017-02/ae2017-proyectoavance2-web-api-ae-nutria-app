@@ -9,8 +9,8 @@ var usuarioSchema=new mongoose.Schema({
 });
 
 
-module.exports=usuarioSchema;
-
+//module.exports=usuarioSchema;
+module.exports=mongoose.model('Usuario',usuarioSchema,'usuario');
 //Mayuscula Usuario:{propieda}
 //Retorno Mayuscula Usuario
 

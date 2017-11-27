@@ -5,4 +5,6 @@ var tipoMenuSchema=new mongoose.Schema({
 })
 
 tipoMenuSchema.plugin(uniqueValidator);
-module.exports=tipoMenuSchema;
+//module.exports=tipoMenuSchema;
+module.exports=mongoose.model('Clasificacion',tipoMenuSchema,'tipoMenu');
+	
