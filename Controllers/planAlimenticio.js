@@ -213,7 +213,7 @@ function getPlanMenuDateId(req, res){
             }
 
         })
-        .sort({"dCreacion": 1})
+        .sort({"dCreacion": -1})
         .limit(1)
         .select({"oPlan.nIdMenu": 1, "oPlan.nHora": 1,"oPlan.bEstado": 1, "oPlan.dConsumo": 1})
         .populate({path:"oPlan.nIdMenu", model: "Menu", select: {"cNombre": 1, "nIdTipoMenu": 1, "bEstado": 1,
