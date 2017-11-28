@@ -39,7 +39,7 @@ function getUser(req, res) {
                 'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1, 'oGenerales.cApellidoM': 1, '_id': 0
             }
         }).
-        exec(handleMany.bind(null, 'Usuarios', res));
+        exec(Service.handleMany.bind(null, 'Usuarios', res));
 }
 
 function signUp(req, res) {
