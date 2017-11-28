@@ -219,7 +219,7 @@ function getPlanMenuDateId(req, res){
         .populate({path:"oPlan.nIdMenu", model: "Menu", select: {"cNombre": 1, "nIdTipoMenu": 1, "bEstado": 1,
         "oComida.nIdProducto": 1, "oComida.nCantidad": 1}, populate: [
             {path: "nIdTipoMenu", model: "Clasificacion", select: {"cDescripcion": 1}},
-            {path: "nIdProducto", model: "Producto", select: {"cDescripcion": 1, "nIdTipo": 1,
+            {path: "oComida.nIdProducto", model: "Producto", select: {"cDescripcion": 1, "nIdTipo": 1,
             "nIdUnidad": 1}, populate: [
                 {path: "nIdTipo", model: "Categoria", select: {"cDescripcion": 1}},
                 {path: "nIdUnidad", model: "Unidad", select: {"cDescripcion": 1}}
