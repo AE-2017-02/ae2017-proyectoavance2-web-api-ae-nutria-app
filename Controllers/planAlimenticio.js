@@ -5,7 +5,7 @@ const Service = require('../Service/functions');
 var status = require('http-status');
 function getPlan(req, res) {
     try {
-        Unidad.find().exec(Service.handleMany.bind(null, 'Unidad', res));
+        Plan.find().exec(Service.handleMany.bind(null, 'Plan', res));
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
