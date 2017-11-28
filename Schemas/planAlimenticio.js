@@ -5,8 +5,8 @@ var planAlimenticioSchema=new mongoose.Schema({
     nIdPaciente:{type:mongoose.Schema.Types.ObjectId},    
     oPlan:[
         {
-        nIdMenu:{type:mongoose.Schema.Types.ObjectId},
-        nHora:{type:Number,required:true},        
+	        nIdMenu:{type:mongoose.Schema.Types.ObjectId},
+	        nHora:{type:Number,required: true}
         }]    
 });
 //module.exports=planAlimenticioSchema;   
