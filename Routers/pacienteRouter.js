@@ -1,7 +1,7 @@
 var Paciente= require('../Controllers/paciente');
 const auth = require('../middlewares/auth')
 module.exports = function(router){
-    router.get('/patient',auth,Paciente.getPatient),
+    router.get('/patient',Paciente.getPatient),
     router.get('/applicant',Paciente.getApplication),
     router.get('/patient/web',Paciente.getPatientWeb),    
 	router.get('/patient/id/:id',Paciente.getPatientId),

@@ -50,6 +50,17 @@ function getAppointmentId(req, res) {
     }
 }
 
+
+function getAppointmentPatientId(req, res) {
+    try {
+        Cita.find({ "nIdPaciente": req.params.id }).exec(Service.handleOne.bind(null, "Citas", res));
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+
 function saveAppointment(req, res) {
     try {
         var datos = req.body.Cita;
@@ -152,6 +163,7 @@ module.exports = {
     getAppointment,
     getAppointmentDay,    
     getAppointmentId,    
+    getAppointmentPatientId,
     saveAppointment,
     updateAppointmentState,   
     updateAppointment,

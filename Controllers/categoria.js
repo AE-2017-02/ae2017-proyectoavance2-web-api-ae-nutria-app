@@ -38,11 +38,16 @@ function saveCategory(req, res) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Categoria no especificada', Detalle: e.message });
     }
     try {
-        Category.create({ cDescripcion: datos.Descripcion }, function (error, tipo) {
+        Category.create({
+            cDescripcion: datos.Descripcion,
+            nProteina: datos.Proteina,
+            nGrasas: datos.Grasas,
+            nEnergia: datos.Energia,
+            nCarbohidratos: datos.Carbohidratos
+        }, function (error, tipo) {
             if (error) {
                 return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
-
             if (!tipo) {
                 return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La categoria no fue registrada", Detalle: '' });
             }
@@ -65,19 +70,24 @@ function updateCategory(req, res) {
         Category.findOneAndUpdate({ "_id": datos.IdCategoria },
             {
                 $set:
-                { "cDescripcion": datos.Descripcion }
+                { "cDescripcion": datos.Descripcion,
+                "nProteinas": datos.Proteinas, 
+                "nGrasas": datos.Grasas,
+                "nEnergia": datos.Energia,
+                "nCarbohidratos": datos.Carbohidratos 
+                }                                         
             }, function (error, categoria) {
-                if (error) {
-                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-                }
-                if (!categoria) {
-                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La categoria no existe", Detalle: '' });
-                }
-                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
-            });
-    } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
-    }
+        if (error) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+        }
+        if (!categoria) {
+            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La categoria no existe", Detalle: '' });
+        }
+        return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+    });
+} catch (e) {
+    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+}
 }
 function deleteCategory(req, res) {
     try {
