@@ -6,7 +6,9 @@ var planAlimenticioSchema=new mongoose.Schema({
     oPlan:[
         {
 	        nIdMenu:{type:mongoose.Schema.Types.ObjectId},
-	        nHora:{type:Number,required: true}
+	        nHora:{type:Number,required: true},
+	        bEstado: {type: Boolean, required: true, default: false},
+	        dConsumo: {type: Date}
         }]    
 });
 //module.exports=planAlimenticioSchema;   
