@@ -57,5 +57,5 @@ avanceSchema.set('toObject',{virtuals:true});
 avanceSchema.set('toJSON',{virtuals:true});
 
 //module.exports=avanceSchema;
-module.export=mongoose.model('Avance',avanceSchema,'avance');
+module.exports=mongoose.model('Avance',avanceSchema,'avance');
 	
