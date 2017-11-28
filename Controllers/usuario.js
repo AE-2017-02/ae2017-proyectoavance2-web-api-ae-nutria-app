@@ -36,7 +36,7 @@ function getUser(req, res) {
     Usuario.find().populate(
         {
             path: "nIdPaciente", model: "Paciente", select: {
-                'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1, 'oGenerales.cApellidoM': 1, '_id': 0
+                'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1, 'oGenerales.cApellidoM': 1, 'oGenerales.dFechaNac':1,'_id': 0
             }
         }).
         exec(Service.handleMany.bind(null, 'Usuarios', res));

@@ -37,10 +37,10 @@ pacienteSchema.virtual("Nombre2").get(function(){
 });
 
 pacienteSchema.virtual("oGenerales.nEdad").get(function(){
-    var nacimiento = this.oGenerales.dFechaNac;
+    var nacimiento = new Date(this.oGenerales.dFechaNac);
     var actual = new Date();
-    var edad = actual.getUTCFullYear() - nacimiento.getUTCFullYear();
-    if(nacimiento.getUTCMonth() >= actual.getUTCMonth() && nacimiento.getUTCDate() > actual.getUTCDate()){
+    var edad = actual.getFullYear() - nacimiento.getFullYear();
+    if(nacimiento.getMonth() >= actual.getMonth() && nacimiento.getDate() > actual.getDate()){
         edad--;
     }
     return edad;
