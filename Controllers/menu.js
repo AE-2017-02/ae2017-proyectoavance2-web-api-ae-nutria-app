@@ -8,7 +8,7 @@ function getMenu(req, res) {
         Menu.find({ "bEstado": true }).populate(
             [
                 {
-                    path: "nIdTipoMenu", model: "TipoM", select: {
+                    path: "nIdTipoMenu", model: "Clasificacion", select: {
                         'cDescripcion': 1, '_id': 0
                     },
                 },
@@ -30,7 +30,7 @@ function getMenuId(req, res) {
         }).populate(
             [
                 {
-                    path: "nIdTipoMenu", model: "TipoM", select: {
+                    path: "nIdTipoMenu", model: "Clasificacion", select: {
                         'cDescripcion': 1, '_id': 1
                     },
                 },

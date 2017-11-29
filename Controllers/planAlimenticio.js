@@ -20,7 +20,7 @@ function getPlanPatientId(req, res) {
               populate: [{path: "oComida.nIdProducto", 
 			  model: "Producto",select:{"cDescripcion":1,"_id":0}, 
 			  populate:{path:"nIdUnidad", model:"Unidad",select:{"cDescripcion":1,"_id":0}}},
-				    {path: "nIdTipoMenu", model: "TipoM", select:{"cDescripcion":1,"_id":0}}]
+				    {path: "nIdTipoMenu", model: "Clasificacion", select:{"cDescripcion":1,"_id":0}}]
             }
         ).exec(Service.handleMany.bind(null, 'Menu',res));
     }
