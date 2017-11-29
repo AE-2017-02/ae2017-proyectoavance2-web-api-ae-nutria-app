@@ -215,10 +215,8 @@ function getPlanMenuDateId(req, res){
         })
         .sort({"dCreacion": -1})
         .limit(1)
-        .select({"oPlan.nIdMenu": 1, "oPlan.nHora": 1,"oPlan.bEstado": 1, "oPlan.dConsumo": 1})
-        .populate({path:"oPlan.nIdMenu", model: "Menu", select: {"cNombre": 1, "nIdTipoMenu": 1, "bEstado": 1,
-        "oComida.nIdProducto": 1, "oComida.nCantidad": 1}, populate: [
-            {path: "nIdTipoMenu", model: "Clasificacion", select: {"cDescripcion": 1}},
+        .select({"oPlan.nIdMenu": 1,"oPlan.bEstado": 1, "oPlan.dConsumo": 1})
+        .populate({path:"oPlan.nIdMenu", model: "Menu", select: {"oComida.nIdProducto": 1, "oComida.nCantidad": 1}, populate: [
             {path: "oComida.nIdProducto", model: "Producto", select: {"cDescripcion": 1, "nIdTipo": 1,
             "nIdUnidad": 1}, populate: [
                 {path: "nIdTipo", model: "Categoria", select: {"cDescripcion": 1}},
