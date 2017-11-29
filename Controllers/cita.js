@@ -72,7 +72,8 @@ function saveAppointment(req, res) {
         Cita.create({
             nIdPaciente: datos.IdPaciente,
             nHora: datos.Hora,
-            cDescripcion: datos.Descripcion
+            cDescripcion: datos.Descripcion,
+            dFecha: datos.Fecha
         }, function (error, cita) {
             if (error) {
                 return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
