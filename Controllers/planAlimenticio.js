@@ -17,11 +17,13 @@ function getPlanPatientId(req, res) {
 
         Plan.findOne({ nIdPaciente: req.params.id }).select('nIdMenu').sort({ dCreacion: -1 }).populate(
             { path: "oPlan.nIdMenu", model: "Menu",
-              populate: [{path: "oComida.nIdProducto", 
-			  model: "Producto",select:{"cDescripcion":1,"_id":0}, 
-			  populate:{path:"nIdUnidad", model:"Unidad",select:{"cDescripcion":1,"_id":0}}},
-				    {path: "nIdTipoMenu", model: "Clasificacion", select:{"cDescripcion":1,"_id":0}}]
-            }
+
+            populate: [{path: "oComida.nIdProducto", 
+            model: "Producto",select:{"cDescripcion":1,"_id":0}, 
+            populate:{path:"nIdUnidad", model:"Unidad",select:{"cDescripcion":1,"_id":0}}},
+            {path: "nIdTipoMenu", model: "Clasificacion", select:{"cDescripcion":1,"_id":0}}]
+        }
+
         ).exec(Service.handleMany.bind(null, 'Menu',res));
     }
     catch (e) {
@@ -91,7 +93,9 @@ function updatePlanMenu(req, res) {
 
             plan.oPlan.push({
                 "nIdMenu": datos.IdMenu,
-                "nHora": datos.Hora
+                "nHora": datos.Hora,
+                "bEstado": datos.Estado,
+                "dConsumo": datos.Consumo
             });
             try {
                 plan.save();
@@ -112,19 +116,119 @@ function deletePlanMenu(req, res) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
     }
     try {
-        Plan.findOneAndUpdate({ "nIdPaciente": datos.IdPaciente }, { $pull: { "oPlan": { "nIdMenu": datos.IdMenu } } }, function (error, plan) {
+
+        Plan.findOne({ "nIdPaciente": datos.IdPaciente }, function(error, plan){
             if (error) {
                 return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
             }
             if (!plan) {
                 return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se pudo borrar el plan", Detalle: "" });
             }
-            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se borro el plan", Detalle: "" });
+            var index = plan.oPlan.findIndex(x => x.nIdMenu == datos.IdMenu);
+            plan.oplan.splice(index, 1);
+            plan.save(function(error){
+                if(error){
+                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });                    
+                }
+            });
         });
     } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
 }
+
+function changeStatusPlanMenu(req, res){
+    try{
+        var datos = req.body.Plan;
+    }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+    }
+
+    try{
+        Plan.find({"nIdPaciente": datos.IdPaciente}, function(error, planillo){
+            if(error){
+                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: error.toString() });
+            }
+            if(!planillo){
+                return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se encontro el plan", Detalle: "" });
+            }
+            var index = planillo[0].oPlan.findIndex(x => x.nIdMenu == datos.IdMenu);
+            if(index != -1){
+                planillo[0].oPlan[index].bEstado = !planillo[0].oPlan[index].bEstado;
+                Plan.update({"_id": planillo[0]._id}, planillo[0], function(er){
+                    if(er){
+                        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+                    }
+                });
+                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se cambio el estado", Detalle: "" });
+            }else{
+             return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se encontro", Detalle: "" });   
+            }
+        }).sort({"dCreacion": 1}).limit(1);
+    }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+    }
+};
+
+function changeDatePlanMenu(req, res){
+    try{
+        var datos = req.body.Plan;
+    }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+    }
+
+    try{
+        Plan.find({"nIdPaciente": datos.IdPaciente}, function(error, plan){
+            if(error){
+                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: error.toString() });
+            }
+            if(!plan){
+                return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se encontro el plan", Detalle: "" });
+            }
+            var index = plan[0].oPlan.findIndex(x => x.nIdMenu == datos.IdMenu);
+            if(index != -1){
+                plan[0].oPlan[index].dConsumo = datos.Consumo;
+                Plan.update({"_id": plan[0]._id}, plan[0], function(er){
+                    if(er){
+                        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+                    }
+                });
+                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se cambio la fecha", Detalle: "" });
+            }else{
+             return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se encontro", Detalle: "" });   
+            }
+        }).sort({"dCreacion": 1}).limit(1);;
+    }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
+    }
+};
+
+function getPlanMenuDateId(req, res){
+
+    try{
+        Plan.find({"nIdPaciente": req.params.id }, function(error, plan){
+            if(error){
+                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: error.toString() });
+            }
+            if(!plan){
+                return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se encontro el plan", Detalle: "" });
+            }
+
+        })
+        .sort({"dCreacion": -1})
+        .limit(1)
+        .select({"oPlan.nIdMenu": 1,"oPlan.bEstado": 1, "oPlan.dConsumo": 1})
+        .populate({path:"oPlan.nIdMenu", model: "Menu", select: {"oComida.nIdProducto": 1, "oComida.nCantidad": 1}, populate: [
+            {path: "oComida.nIdProducto", model: "Producto", select: {"cDescripcion": 1, "nIdTipo": 1,
+            "nIdUnidad": 1}, populate: [
+                {path: "nIdTipo", model: "Categoria", select: {"cDescripcion": 1}},
+                {path: "nIdUnidad", model: "Unidad", select: {"cDescripcion": 1}}
+            ]}
+        ]}).exec(Service.handleMany.bind(null, 'Despensa',res));
+    }catch(e){
+       return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });           
+    }
+};
 
 
 
@@ -134,5 +238,8 @@ module.exports = {
     savePlan,
     updatePlanMenu,
     deletePlanMenu,
-    deletePlan
+    deletePlan,
+    changeStatusPlanMenu,
+    changeDatePlanMenu,
+    getPlanMenuDateId
 }
