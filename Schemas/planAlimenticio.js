@@ -1,7 +1,7 @@
 var mongoose=require('mongoose');
 
-var planAlimenticioSchema=new mongoose.Schema({
-    dCreacion:{type:Date, required:true,default: new Date()},     
+var planAlimenticioSchema=new mongoose.Schema({    
+    dCreacion:{type:Date, required:true,default: Date.now},     
     nIdPaciente:{type:mongoose.Schema.Types.ObjectId},    
     oPlan:[
         {

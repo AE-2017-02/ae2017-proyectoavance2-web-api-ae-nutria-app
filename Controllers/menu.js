@@ -161,7 +161,7 @@ function saveMenuFood(req, res) {
 function deleteMenuFood(req, res) {
     try {
         var datos = req.body.Porcion;
-    }
+       }
     catch (e) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Producto no especificado', Detalle: e.message });
     }
