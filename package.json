@@ -13,14 +13,14 @@
     "express": "^4.15.2",
     "express-session": "1.11.2",
     "http-status": "0.1.8",
+    "jwt-simple": "^0.5.1",
+    "moment": "^2.19.3",
     "mongoose": "^4.9.8",
+    "mongoose-unique-validator": "1.0.6",
     "passport": "0.2.2",
     "passport-facebook": "2.0.0",
     "underscore": "1.5.2",
-    "wagner-core": "0.1.0",
-    "mongoose-unique-validator": "1.0.6",
-    "moment": "^2.16.0",
-    "jwt-simple": "^0.5.1"
+    "wagner-core": "0.1.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",

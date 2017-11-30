@@ -81,10 +81,9 @@ function savePatient(req, res) {
             }
             if (patient) {
                 return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El correo ya esta registrado", Detalle: '' });
-            }
+            }            
             Paciente.create({
-                cPin: Token(),
-                bEstado: datos.Estado,
+                cPin: Token(),                
                 oGenerales: {
                     cNombre: datos.Generales.Nombre,
                     cApellidoP: datos.Generales.ApellidoP,
@@ -92,7 +91,8 @@ function savePatient(req, res) {
                     cSexo: datos.Generales.Sexo,
                     cEmail: datos.Generales.Email,
                     cTelefono: datos.Generales.Telefono,
-                    dFechaNac: new Date(datos.Generales.FechaNac)
+                    //dFechaNac: new Date(datos.Generales.FechaNac)
+                    dFechaNac: datos.Generales.FechaNac
                 },
                 oAntecedentes: {
                     nPesoHabitual: datos.Antecedentes.PesoHabitual,
@@ -197,6 +197,9 @@ function updatePatientState(req,res){
       }
 }
 
+function Token() {
+  return parseInt(Math.random() * 10000);
+}
 module.exports = {    
     getApplication,
     getPatient,
