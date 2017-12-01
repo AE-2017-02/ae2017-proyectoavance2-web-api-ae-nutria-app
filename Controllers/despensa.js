@@ -20,8 +20,8 @@ function getPantryId(req, res){
 				return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'No se encontro despensa para la fecha', Detalle: '' });
 			}
 
-			return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operacion Exitosa', Despensa: despensa });
-		}).populate(
+			return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operacion Exitosa', Despensa: despensa.oProductos });
+		}).select({"oProductos": 1, "_id": 0 }).populate(
 		{path: "oProductos.nIdProducto", model: "Producto", select: {"cDescripcion": 1, "nIdTipo": 1, "nIdUnidad": 1},
 		populate: 
 		[
