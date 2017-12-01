@@ -23,5 +23,6 @@ module.exports = function(router){
     require('./pacienteRouter')(router),
     require('./planAlimenticioRouter')(router),
     require('./productoRouter')(router),
-    require('./usuarioRouter')(router)        
+    require('./usuarioRouter')(router),
+    require('./despensaRouter')(router)        
 }
