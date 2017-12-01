@@ -21,7 +21,7 @@ function getPantryId(req, res){
 			}
 
 			return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operacion Exitosa', Despensa: despensa.oProductos });
-		}).select({"oProductos": 1, "_id": 0 }).populate(
+		}).select({"oProductos": 1 }).populate(
 		{path: "oProductos.nIdProducto", model: "Producto", select: {"cDescripcion": 1, "nIdTipo": 1, "nIdUnidad": 1},
 		populate: 
 		[
