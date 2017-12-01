@@ -5,7 +5,7 @@ var despensaSchema = new mongoose.Schema({
 	dConsumo: {type: Date},
 	oProductos:[
 		{
-			nIdProducto: { type: mongoose.Schema.Types.ObjectId, required: true},
+			nIdProducto: { type: mongoose.Schema.Types.ObjectId},
 			nCantidad: {type: Number, required:true},
 			bMarcado: {type: Boolean, default: false}
 		}

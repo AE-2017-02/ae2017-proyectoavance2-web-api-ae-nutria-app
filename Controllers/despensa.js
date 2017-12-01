@@ -20,17 +20,15 @@ function getPantryId(req, res){
 				return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'No se encontro despensa para la fecha', Detalle: '' });
 			}
 
-			return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operacion Exitosa', Despensa: despensa.oProductos });
+			return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operacion Exitosa', Despensa: despensa });
 		}).populate(
-		{path: "nIdProdcuto", model: "Producto", select: {"cDescripcion": 1, "nIdTipo": 1, "nIdUnidad": 1},
+		{path: "oProductos.nIdProducto", model: "Producto", select: {"cDescripcion": 1, "nIdTipo": 1, "nIdUnidad": 1},
 		populate: 
 		[
 		{path: "nIdTipo", model: "Categoria", select: {"cDescripcion": 1}},
 		{path: "nIdUnidad", model: "Unidad", select: {"cDescripcion": 1}}
 		]
-	}
-
-	);
+	});
 	}catch(e){
 		return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
 	}
