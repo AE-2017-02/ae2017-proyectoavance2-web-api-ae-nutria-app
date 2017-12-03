@@ -52,10 +52,17 @@ function updatePantryId(req, res){
 					"nIdPaciente": datos.IdPaciente,
 					"dConsumo": new Date(datos.Consumo),
 					"oProductos": datos.Productos
+				}, function(er, des){
+					if(er){
+						return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: er.toString()});	
+					}
+					if(!des){
+						return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "La unidad no fue registrada", Detalle: '' });
+					}
 				});		
 			}else{
 				despensa.oProductos = datos.Productos;
-				desepnsa.save(function(er){
+				despensa.save(function(er){
 					if(er){
 						return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: er.toString()});	
 					}
