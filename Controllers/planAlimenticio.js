@@ -15,7 +15,7 @@ function getPlan(req, res) {
 function getPlanPatientId(req, res) {
     try {
 
-        Plan.findOne({ nIdPaciente: req.params.id }).select('nIdMenu', 'bEstado', 'dConsumo').sort({ dCreacion: -1 }).populate(
+        Plan.findOne({ nIdPaciente: req.params.id }).select({'oPlan.nIdMenu':1, 'oPlan.bEstado':1, 'oPlan.dConsumo':1}).sort({ dCreacion: -1 }).populate(
             { path: "oPlan.nIdMenu", model: "Menu",
 
             populate: [{path: "oComida.nIdProducto", 
@@ -185,28 +185,27 @@ function changeDatePlanMenu(req, res){
             }
             var fecha = datos.Fecha;
             var arregloMenus =  datos.Plan;
-            arregloMenus.forEach(function(documento){
-                var idMenu = documento.IdMenu;
-                var estado = documento.Estado;
+            var tamaño = arregloMenus.length;
+            for(var i = 0; i < tamaño; i++){
+                var idMenu = arregloMenus[i].IdMenu;
+                var estado = arregloMenus[i].Estado;
 
                 var index = plan[0].oPlan.findIndex(x => x.nIdMenu == idMenu);
                 if(index != -1){
                     if(estado){
-                        plan[0].oPlan[index].addToSet(fecha);
+                        plan[0].oPlan[index].dConsumo.addToSet(fecha);
                     }else{
-                        plan[0].oPlan[index].pull(fecha);
+                        plan[0].oPlan[index].dConsumo.pull(fecha);
                     }
                     Plan.update({"_id": plan[0]._id}, plan[0], function(er){
                         if(er){
                             return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
                         }
                     });
-                    return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se cambio la fecha", Detalle: "" });
-                }else{
-                    return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "No se encontro", Detalle: "" });        
+                    
                 }
-
-            });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: "Se cambio la fecha", Detalle: "" });
        }).sort({"dCreacion": -1}).limit(1);;
     }catch(e){
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Plan no valido", Detalle: e.message });
@@ -249,7 +248,6 @@ module.exports = {
     updatePlanMenu,
     deletePlanMenu,
     deletePlan,
-    changeStatusPlanMenu,
     changeDatePlanMenu,
     getPlanMenuDateId
 }
