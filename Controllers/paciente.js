@@ -35,7 +35,7 @@ function getPatientWeb(req, res) {
     try {        
         Usuario.find().select({ cNombre: 1, cImagen: 1 }).populate({
             path: "nIdPaciente", model: "Paciente", select: {
-                'oGenerales.cNombre': 1, 'oGenerales.nEdad': 1, '_id': 1, 'NombreComplete': 1, 'bEstado': 1
+                'oGenerales.cNombre': 1,'oGenerales.cApellidoM': 1,'oGenerales.cApellidoP': 1, 'oGenerales.nEdad': 1, '_id': 1, 'NombreCompleto': 1, 'bEstado': 1
             }
         }).exec(Service.handleMany.bind(null, 'Pacientes', res));
     }

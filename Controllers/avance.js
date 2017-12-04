@@ -13,6 +13,25 @@ function getAvancePatientId(req, res) {
     }
 }
 
+function getAvancePatientPenultimoId(req, res) {    
+    try {        
+        Avance.find({ "nIdPaciente": req.params.id }).sort({ "dCreacion": -1 }).skip(1).limit(1).exec(Service.handleOne.bind(null, 'Avance', res));
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+function getAvancePatientUltimoId(req, res) {
+    try {
+        Avance.find({ "nIdPaciente": req.params.id }).sort({ "dCreacion": -1 }).limit(1).exec(Service.handleMany.bind(null, 'Avance', res));
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+
 function getAvanceId(req, res) {
     try {
         Avance.findOne({ _id: req.params.id }, function (error, avance) {
@@ -30,6 +49,15 @@ function getAvanceId(req, res) {
     }
 }
 
+function getAvanceFecha(req,res){
+    try {
+        Avance.find({ nIdPaciente: req.params.id }).select(
+            {'dFecha':1,'_id':-1}).exec(Service.handleMany.bind(null, 'Fecha',res));;
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
 function saveAvance(req, res) {
     try {
         var datos = req.body.Avance;
@@ -49,14 +77,13 @@ function saveAvance(req, res) {
                 nMuslo: datos.Circuferencia.Muslo,
                 nCadera: datos.Circuferencia.Cadera,
                 nPantorrilla: datos.Circuferencia.Pantorilla,
-                nMuneca: datos.Circuferencia.Muneca
+                nMuneca: datos.Circuferencia.Muneca                
             },
             oPliegues: {
-                nTricipital: datos.Pliegues.Tripicial,
+                nTricipital: datos.Pliegues.Tricipital,
                 nEscapular: datos.Pliegues.Escapular,
                 nBicipital: datos.Pliegues.Bicipital,
                 nSiliaco: datos.Pliegues.Siliaco,
-
                 nEspinale: datos.Pliegues.Espinale,
                 nAbdominal: datos.Pliegues.Abdominal,
                 nMuslo: datos.Pliegues.Muslo,
@@ -130,7 +157,10 @@ function updateAvance(req, res) {
 
 module.exports = {
     getAvancePatientId,
+    getAvancePatientUltimoId,
+    getAvancePatientPenultimoId,
     getAvanceId,
+    getAvanceFecha,
     saveAvance,
-    updateAvance 
+    updateAvance
 }

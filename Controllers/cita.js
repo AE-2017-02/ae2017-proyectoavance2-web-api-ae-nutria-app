@@ -22,7 +22,6 @@ function getAppointment(req, res) {
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
-
 }
 
 function getAppointmentDay(req, res) {
@@ -32,7 +31,7 @@ function getAppointmentDay(req, res) {
                 path: "nIdPaciente", model: "Paciente",
                 select: {
                     'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1,
-                    'oGenerales.cApellidoM': 1, "Nombre2": 1
+                    'oGenerales.cApellidoM': 1, "NombreCompleto": 1
                 }
             }).exec(Service.handleMany.bind(null, 'Citas', res));
     }
@@ -54,6 +53,22 @@ function getAppointmentId(req, res) {
 function getAppointmentPatientId(req, res) {
     try {
         Cita.find({ "nIdPaciente": req.params.id }).exec(Service.handleOne.bind(null, "Citas", res));
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+function getAppointmentAll(req, res) {
+    try {
+        
+        Cita.find({"cEstado":{"$not":/Finalizada/}}).populate({
+            path: "nIdPaciente", model: "Paciente",
+            select: {
+                'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1,
+                'oGenerales.cApellidoM': 1, "NombreCompleto": 1
+            }
+        }).exec(Service.handleOne.bind(null, "Citas", res));
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
@@ -162,11 +177,12 @@ function deleteAppointment(req, res) {
 
 module.exports = {
     getAppointment,
-    getAppointmentDay,    
-    getAppointmentId,    
+    getAppointmentDay,
+    getAppointmentId,
     getAppointmentPatientId,
+    getAppointmentAll,
     saveAppointment,
-    updateAppointmentState,   
+    updateAppointmentState,
     updateAppointment,
     deleteAppointment
 }
