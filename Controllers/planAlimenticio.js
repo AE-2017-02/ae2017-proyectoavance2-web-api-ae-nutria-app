@@ -195,7 +195,7 @@ function changeDatePlanMenu(req, res){
                     if(estado){
                         plan[0].oPlan[index].dConsumo.addToSet(fecha);
                     }else{
-                        plan[0].oPlan[index].dConsumo.pull(fecha);
+                        plan[0].oPlan[index].dConsumo.pull(new Date(fecha));
                     }
                     Plan.update({"_id": plan[0]._id}, plan[0], function(er){
                         if(er){
