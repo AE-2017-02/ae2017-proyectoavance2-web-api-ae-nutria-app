@@ -196,7 +196,6 @@ function changeDatePlanMenu(req, res){
                         plan[0].oPlan[index].dConsumo.addToSet(fecha);
                     }else{
                         var ind = plan[0].oPlan[index].dConsumo.findIndex(x => new Date(x).toISOString() == new Date(fecha).toISOString());
-                        console.log(ind);
                         if(ind != -1){
                                 plan[0].oPlan[index].dConsumo.splice(ind, 1);
                         }
