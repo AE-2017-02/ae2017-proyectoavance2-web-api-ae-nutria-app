@@ -195,7 +195,11 @@ function changeDatePlanMenu(req, res){
                     if(estado){
                         plan[0].oPlan[index].dConsumo.addToSet(fecha);
                     }else{
-                        plan[0].oPlan[index].dConsumo.pull(new Date(fecha));
+                        var ind = plan[0].oPlan[index].dConsumo.findIndex(x => new Date(x).toISOString() == new Date(fecha).toISOString());
+                        console.log(ind);
+                        if(ind != -1){
+                                plan[0].oPlan[index].dConsumo.splice(ind, 1);
+                        }
                     }
                     Plan.update({"_id": plan[0]._id}, plan[0], function(er){
                         if(er){
