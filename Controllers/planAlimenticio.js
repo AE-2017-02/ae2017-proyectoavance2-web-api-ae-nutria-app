@@ -20,7 +20,8 @@ function getPlanPatientId(req, res) {
 
             populate: [{path: "oComida.nIdProducto", 
             model: "Producto",select:{"cDescripcion":1,"_id":1}, 
-            populate:{path:"nIdUnidad", model:"Unidad",select:{"cDescripcion":1,"_id":0}}},
+            populate:[{path:"nIdUnidad", model:"Unidad",select:{"cDescripcion":1,"_id":0}},
+                {path:"nIdTipo", model:"Categoria", select:{"cDescripcion":1, "_id": 0}}]},
             {path: "nIdTipoMenu", model: "Clasificacion", select:{"cDescripcion":1,"_id":0}}]
         }
 
