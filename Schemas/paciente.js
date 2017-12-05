@@ -31,9 +31,9 @@ var pacienteSchema=new mongoose.Schema({
     }
 });
 
-pacienteSchema.virtual("Nombre2").get(function(){    
-    return (this.oGenerales.cNombre+' '+this.oGenerales.cApellidoP
-    +' '+this.oGenerales.cApellidoM);
+pacienteSchema.virtual("NombreCompleto").get(function(){    
+    return (this.oGenerales.cNombre+' '+this.oGenerales.cApellidoP);
+//+' '+this.oGenerales.cApellidoM);
 });
 
 pacienteSchema.virtual("oGenerales.nEdad").get(function(){

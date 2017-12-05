@@ -5,6 +5,7 @@ module.exports = function(router){
 	router.get('/appointment/id/:id',Appointment.getAppointmentId),
     router.get('/appointment/patient/:id',Appointment.getAppointmentPatientId),
     router.get('/appointment/day',Appointment.getAppointmentDay),
+    router.get('/appointment/all',Appointment.getAppointmentAll),
 	router.post('/appointment/add', Appointment.saveAppointment),	
     router.put('/appointment/update', Appointment.updateAppointment),
     router.put('/appointment/state', Appointment.updateAppointmentState),
