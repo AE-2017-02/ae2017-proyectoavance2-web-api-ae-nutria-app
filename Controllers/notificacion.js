@@ -10,7 +10,7 @@ function getNotification(req, res) {
                 'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1,
                 'oGenerales.cApellidoM': 1, "Nombre2": 1
             }
-        }).exec(handleMany.bind(null, 'Notificacion', res));
+        }).exec(Service.handleMany.bind(null, 'Notificacion', res));
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
@@ -24,7 +24,7 @@ function getNotificationId(req, res) {
                 'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1,
                 'oGenerales.cApellidoM': 1, "Nombre2": 1, "_id": 0,
             }
-        }).exec(handleOne.bind(null, 'Notificacion', res));
+        }).exec(Service.handleOne.bind(null, 'Notificacion', res));
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
@@ -60,8 +60,23 @@ function saveNotification(req, res) {
     }
 }
 
+function getGeneralNotification(req, res){
+    try{
+
+    }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+
+    try{
+        Notificacion.find({"oPacientes": {"$size": 0}}).sort({"dFecha": -1}).limit(10).exec(Service.handleMany.bind(null, 'Notificacion', res));
+    }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+};
+
 module.exports = {
     getNotification,
     getNotificationId,
-    saveNotification
+    saveNotification,
+    getGeneralNotification
 }
