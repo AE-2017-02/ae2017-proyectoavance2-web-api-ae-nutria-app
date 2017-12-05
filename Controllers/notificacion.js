@@ -62,21 +62,29 @@ function saveNotification(req, res) {
 
 function getGeneralNotification(req, res){
     try{
-
-    }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
-    }
-
-    try{
         Notificacion.find({"oPacientes": {"$size": 0}}).sort({"dFecha": -1}).limit(10).exec(Service.handleMany.bind(null, 'Notificacion', res));
     }catch(e){
         return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
 };
 
+function getPersonalNotification(req, res){
+    try{
+        var idPaciente = req.params.id;
+    }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+    try{
+        Notificacion.find({"oPacientes.nIdPaciente":{"$eq": idPaciente}}).sort({"dFecha": -1}).limit(10).exec(Service.handleMany.bind(null, 'Notificacion', res));
+    }catch(e){
+        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }  
+};
+
 module.exports = {
     getNotification,
     getNotificationId,
     saveNotification,
-    getGeneralNotification
+    getGeneralNotification,
+    getPersonalNotification
 }
