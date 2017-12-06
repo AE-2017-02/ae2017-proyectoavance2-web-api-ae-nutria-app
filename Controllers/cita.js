@@ -90,7 +90,7 @@ function saveAppointment(req, res) {
 			return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
 		}	
 		if(cita){
-			return res.status(status.NO_CONTENT).json({ Codigo: status.NO_CONTENT, Mensaje: "Cuenta con una cita pendiente o aceptada", Detalle:"" });
+			return res.status(status.OK).json({ Codigo: status.NO_CONTENT, Mensaje: "Cuenta con una cita pendiente o aceptada", Detalle:"" });
 		}
 		Cita.create({
             nIdPaciente: datos.IdPaciente,
