@@ -4,7 +4,7 @@ var citaSchema = new mongoose.Schema({
     nIdPaciente: { type: mongoose.Schema.Types.ObjectId },
     dFecha: { type: Date, required: true, default: new Date() },
     nHora: { type: Number, required: true },
-    cEstado: { type: String, required: true, enum: ['Pendiente', 'Confirmada','Cancelada','Finalizada'], default: "Pendiente" },
+    cEstado: { type: String, required: true, enum: ['Pendiente', 'Confirmada','Cancelada','Finalizadains'], default: "Pendiente" },
     cDescripcion: { type: String, maxlength: 500 }
 });
 
