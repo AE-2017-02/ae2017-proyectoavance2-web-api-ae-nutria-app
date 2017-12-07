@@ -50,7 +50,7 @@ function signUp(req, res) {
         return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: error.toString() });
     }
     try {
-        var Paciente = mongoose.model('Paciente', require('./Schemas/paciente'), 'paciente');
+        var Paciente = require('../Schemas/paciente');
         Paciente.findOne({
             "cPin": datos.Pin,
             "oGenerales.cEmail": datos.Email,
@@ -75,20 +75,23 @@ function signUp(req, res) {
                         return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario ya existe", Detalle: '' });
                     }
                 }
-                Usuario.create({ "cNombre": datos.Nombre, "cImagen": datos.Imagen, "nIdPaciente": paciente._id },
-                    function (error, user) {
-                        if (error) {
-                            return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-                        }
-                        if (!user) {
-                            return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al registrar el usuario', Detalle: '' });
-                        }
-                        return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: { token: Service.createToken(user) } });
-                    });
+                Usuario.create({ "cNombre": datos.Nombre, "cImagen": datos.Imagen, "nIdPaciente": paciente._id }, function (error, user) {
+                	if (error) {
+                        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+                    }
+                    if (!user) {
+                        return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al registrar el usuario', Detalle: '' });
+                    }
+                    return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: { token: Service.createToken(user) } });
+               	}).populate({
+                path: "nIdPaciente", model: "Paciente", select: {
+                    'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1, "oGenerales.cSexo": 1, "oGenerales.dFechaNac": 1
+                }
+				});
             })
         });
     } catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.message });
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
 
 }
