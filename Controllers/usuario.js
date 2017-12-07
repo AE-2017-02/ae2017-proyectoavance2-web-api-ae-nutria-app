@@ -139,9 +139,50 @@ function updateUser(req, res) {
     }
 }
 
+function updateUserApplication(req, res){
+	try { 
+		var datos = req.body.Usuario; 
+	}catch (e) {        
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Usuario no especificado', Detalle: e.message });
+    }
+
+    try {
+        Usuario.findOne({ "nIdPaciente": datos.IdPaciente}, function (error, user1) {
+            if (error) {                
+                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!user1) {             
+                return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario no existe", Detalle: '' });
+            }
+			user1.cNombre = datos.Usuario;
+			user1.save(function(error2){
+				if(error2){
+                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error2.toString() });
+				}else{
+					var Paciente = require('../Schemas/paciente');
+					Paciente.findOneAndUpdate({"_id": user1.nIdPaciente},{"$set":{"oGenerales.cEmail": datos.Email}}, function(error3, paciente){
+						if(error3){
+                    		return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error3.toString() });
+						}
+						if(!paciente){
+                			return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El paciente no existe", Detalle: '' });
+						}
+                		return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Actualización realizada exitosamente', Detalle: '' });
+					});
+				}
+				
+			});
+		});
+    } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+
+}
+
 module.exports = {
     getUser,
     updateUser,
     signIn,
-    signUp 
+    signUp,
+	updateUserApplication 
 }
