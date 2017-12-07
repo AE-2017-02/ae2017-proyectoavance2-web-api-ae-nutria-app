@@ -82,12 +82,20 @@ function signUp(req, res) {
                     if (!user) {
                         return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al registrar el usuario', Detalle: '' });
                     }
-                    return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: { token: Service.createToken(user) } });
-               	}).populate({
-                path: "nIdPaciente", model: "Paciente", select: {
-                    'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1, "oGenerales.cSexo": 1, "oGenerales.dFechaNac": 1
-                }
-				});
+					Usuario.findOne({"_id": user._id}, function(errorsillo, usuarillo){
+						if(errorsillo){
+                        	return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+						}
+						if(!usuarillo){
+                        	return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario ya existe", Detalle: '' });
+						}
+                    	return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: usuarillo });
+					}).populate({
+                	path: "nIdPaciente", model: "Paciente", select: {
+                    	'oGenerales.cEmail': 1, 'cPin': 1, '_id': 1, "oGenerales.cSexo": 1, "oGenerales.dFechaNac": 1
+                	}
+					});
+               	});
             })
         });
     } catch (e) {
