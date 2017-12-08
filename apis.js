@@ -6,7 +6,7 @@ const app = express();
 var router=express.Router();
 
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(function (req, res, next) {
     // res.append('Access-Control-Allow-Origin', req.headers.origin || '*');
     res.append('Access-Control-Allow-Origin', '*');
@@ -17,6 +17,7 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use('/static', express.static(__dirname + '/imagen'));
 app.use('/api/v1',router);
 require('./Routers/routes')(router);
 module.exports = app;
