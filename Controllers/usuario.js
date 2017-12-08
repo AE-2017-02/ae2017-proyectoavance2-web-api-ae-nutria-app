@@ -159,7 +159,7 @@ function updateUserApplication(req, res){
 				return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error1.toString() });
 			}
 			if(paciente1 && (paciente1._id != datos.IdPaciente)){
-				return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario no existe", Detalle: '' });
+				return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El correo no puede ser usado", Detalle: '' });
 			}
 			Usuario.findOne({ "nIdPaciente": datos.IdPaciente}, function (error2, user1) {
             	if (error2) {                
