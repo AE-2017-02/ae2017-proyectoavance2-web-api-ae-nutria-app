@@ -60,31 +60,85 @@ function saveNotification(req, res) {
     }
 }
 
-function getGeneralNotification(req, res){
-    try{
-        Notificacion.find({"oPacientes": {"$size": 0}}).sort({"dFecha": -1}).limit(10).exec(Service.handleMany.bind(null, 'Notificacion', res));
-    }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+function getGeneralNotification(req, res) {
+    try {
+        Notificacion.find({ "oPacientes": { "$size": 0 } }).sort({ "dFecha": -1 }).limit(10).exec(Service.handleMany.bind(null, 'Notificacion', res));
+    } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
 };
 
-function getPersonalNotification(req, res){
-    try{
+function getPersonalNotification(req, res) {
+    try {
         var idPaciente = req.params.id;
-    }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
-    try{
-        Notificacion.find({"oPacientes.nIdPaciente":{"$eq": idPaciente}}).sort({"dFecha": -1}).limit(10).exec(Service.handleMany.bind(null, 'Notificacion', res));
-    }catch(e){
-        return res.status(status.INTERNAL_SERVER_ERROR).json({Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
-    }  
+    try {
+        Notificacion.find({ "oPacientes.nIdPaciente": { "$eq": idPaciente } }).sort({ "dFecha": -1 }).limit(10).exec(Service.handleMany.bind(null, 'Notificacion', res));
+    } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
 };
+
+
+function oneSignal(req, res) {
+
+    try {
+        var sendNotification = function (data) {
+            var headers = {
+                "Content-Type": "application/json; charset=utf-8",
+                "Authorization": "Basic ZjI0YWMwMmMtNmE1Ni00MzEyLWExZDktODEyNGZlMDk4MzBi"
+            };
+
+            var options = {
+                host: "onesignal.com",
+                port: 443,
+                path: "/api/v1/notifications",
+                method: "POST",
+                headers: headers
+            };
+
+            var https = require('https');
+            var req = https.request(options, function (res2) {
+                res2.on('data', function (data) {
+                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La notificacion fue registrada", Detalle: data });
+                    // console.log(JSON.parse(data));                    
+                });
+            });
+
+            console.log(req);
+            req.on('error', function (e) {
+                // console.log("ERROR:");
+                // console.log(e);
+                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e });
+            });
+
+            req.write(JSON.stringify(data));
+            req.end();
+        };
+
+        var message = {
+            app_id: "e682db34-c650-4ba4-a0b1-f0d7c8d5d8f5",
+            contents: { "en": "Pruebas vue" },
+            included_segments: ["All"]
+        };
+
+        sendNotification(message);
+        // return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+
 
 module.exports = {
     getNotification,
     getNotificationId,
     saveNotification,
     getGeneralNotification,
-    getPersonalNotification
+    getPersonalNotification,
+    oneSignal
 }

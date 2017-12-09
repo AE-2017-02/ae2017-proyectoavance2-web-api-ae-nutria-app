@@ -10,3 +10,5 @@ var notificacionSchema=new mongoose.Schema({
 
 //module.exports=notificacionSchema;   
 module.exports=mongoose.model('Notificacion',notificacionSchema,'notificacion');
+
+
