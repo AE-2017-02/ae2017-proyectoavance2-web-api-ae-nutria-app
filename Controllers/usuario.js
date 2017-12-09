@@ -2,6 +2,7 @@
 
 const Usuario = require('../Schemas/usuario');
 const Service = require('../Service/functions');
+var fs = require('fs');
 var status = require('http-status');
 function signIn(req, res) {
     try {
@@ -75,13 +76,18 @@ function signUp(req, res) {
                         return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario ya existe", Detalle: '' });
                     }
                 }
-                Usuario.create({ "cNombre": datos.Nombre, "cImagen": datos.Imagen, "nIdPaciente": paciente._id }, function (error, user) {
+				var bitmap = new Buffer(datos.Imagen, 'base64');
+				var nombre = paciente._id + '.jpg';
+				var ruta = 'imagen/' + nombre;
+				fs.writeFileSync(ruta, bitmap);
+				var respuestaI = '/static/' + nombre;
+                Usuario.create({ "cNombre": datos.Nombre, "cImagen": respuestaI, "nIdPaciente": paciente._id }, function (error, user) {
                 	if (error) {
                         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
                     }
                     if (!user) {
                         return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: 'Problema al registrar el usuario', Detalle: '' });
-                    }
+                    } 
 					Usuario.findOne({"_id": user._id}, function(errorsillo, usuarillo){
 						if(errorsillo){
                         	return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
@@ -147,32 +153,52 @@ function updateUserApplication(req, res){
     }
 
     try {
-        Usuario.findOne({ "nIdPaciente": datos.IdPaciente}, function (error, user1) {
-            if (error) {                
-                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-            }
-            if (!user1) {             
-                return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario no existe", Detalle: '' });
-            }
-			user1.cNombre = datos.Usuario;
-			user1.save(function(error2){
-				if(error2){
-                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error2.toString() });
-				}else{
-					var Paciente = require('../Schemas/paciente');
-					Paciente.findOneAndUpdate({"_id": user1.nIdPaciente},{"$set":{"oGenerales.cEmail": datos.Email}}, function(error3, paciente){
-						if(error3){
-                    		return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error3.toString() });
-						}
-						if(!paciente){
-                			return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El paciente no existe", Detalle: '' });
-						}
-                		return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Actualización realizada exitosamente', Detalle: '' });
-					});
-				}
+		var Paciente = require('../Schemas/paciente');
+		Paciente.findOne({'oGenerales.cEmail': datos.Email}, function(error1, paciente1){
+			if(error1){
+				return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error1.toString() });
+			}
+			if(paciente1 && (paciente1._id != datos.IdPaciente)){
+				return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El correo no puede ser usado", Detalle: '' });
+			}
+			Usuario.findOne({ "nIdPaciente": datos.IdPaciente}, function (error2, user1) {
+            	if (error2) {                
+                	return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error2.toString() });
+            	}
+            	if (!user1) {             
+                	return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El usuario no existe", Detalle: '' });
+            	}
 				
+				var nombre = datos.IdPaciente + '.jpg';
+				var ruta = 'imagen/' + nombre;
+				fs.unlink(ruta, function(error3){
+					if(error3){
+						return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error3.toString() });
+					}
+					user1.cNombre = datos.Usuario;
+					var bitmap = new Buffer(datos.Imagen, 'base64');
+					fs.writeFileSync(ruta, bitmap);
+					user1.cImagen = '/static/' + nombre;
+					user1.save(function(error4){
+						if(error4){
+                    		return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error4.toString() });
+						}else{
+							Paciente.findOneAndUpdate({"_id": user1.nIdPaciente},{"$set":{"oGenerales.cEmail": datos.Email}}, function(error5, paciente2){
+								if(error5){
+                    				return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error5.toString() });
+								}
+								if(!paciente2){
+                					return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El paciente no existe", Detalle: '' });
+								}
+                				return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Actualización realizada exitosamente', Detalle: '' });
+							});
+						}	
+					});			
+				});
 			});
-		});
+					
+		});	
+        
     } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
