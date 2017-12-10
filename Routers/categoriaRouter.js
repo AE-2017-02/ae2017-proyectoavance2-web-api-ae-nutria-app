@@ -5,5 +5,5 @@ module.exports = function(router){
 	router.get('/category/id/:id',Categoria.getCategoryId),
 	router.post('/category/add', Categoria.saveCategory),	
     router.put('/category/update', Categoria.updateCategory),
-    router.delete('/category/delete', Categoria.deleteCategory)
+    router.delete('/category/delete/:id', Categoria.deleteCategory)
 }
