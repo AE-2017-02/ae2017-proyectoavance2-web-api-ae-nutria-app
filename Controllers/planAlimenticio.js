@@ -15,7 +15,7 @@ function getPlan(req, res) {
 function getPlanPatientId(req, res) {
     try {
 
-        Plan.findOne({ nIdPaciente: req.params.id }).select({'oPlan.nIdMenu':1, 'oPlan.bEstado':1, 'oPlan.dConsumo':1}).sort({ dCreacion: -1 }).populate(
+        Plan.findOne({ nIdPaciente: req.params.id }).select({'oPlan.nIdMenu':1, 'oPlan.bEstado':1,'oPlan.nHora':1, 'oPlan.dConsumo':1}).sort({ dCreacion: -1 }).populate(
             { path: "oPlan.nIdMenu", model: "Menu",
 
             populate: [{path: "oComida.nIdProducto", 
