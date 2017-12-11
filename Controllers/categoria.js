@@ -6,7 +6,7 @@ var status = require('http-status');
 
 function getCategory(req, res) {
     try {
-        Category.find().exec(Service.handleMany.bind(null, 'Categoria', res));
+        Category.find({'bEstado':true}).exec(Service.handleMany.bind(null, 'Categoria', res));
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
@@ -90,14 +90,8 @@ function updateCategory(req, res) {
 }
 }
 function deleteCategory(req, res) {
-    try {
-        var datos = req.body.Categoria;
-    }
-    catch (e) {
-        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Categoria no especificada', Detalle: e.message });
-    }
-    try {
-        Category.findOneAndUpdate({ "_id": datos.IdCategoria },
+     try {          
+        Category.findOneAndUpdate({ "_id":req.params.id},
             {
                 $set:
                 { "bEstado": false }
@@ -113,7 +107,32 @@ function deleteCategory(req, res) {
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
-    }
+    }   
+    // try {
+    //     var datos = req.body.Categoria;
+    // }
+    // catch (e) {
+    //     return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Categoria no especificada', Detalle: e.message });
+    // }
+    // try {
+    //     Console.log(datos);
+    //     Category.findOneAndUpdate({ "_id": datos.IdCategoria },
+    //         {
+    //             $set:
+    //             { "bEstado": false }
+    //         }, function (error, categoria) {
+    //             if (error) {
+    //                 return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+    //             }
+    //             if (!categoria) {
+    //                 return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'La categoria no existe', Detalle: '' });
+    //             }
+    //             return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'La categoria ha sido borrado exitosamente', Detalle: '' });
+    //         });
+    // }
+    // catch (e) {
+    //     return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    // }
 }
 
 module.exports = {
