@@ -62,7 +62,8 @@ function getAppointmentPatientId(req, res) {
 function getAppointmentAll(req, res) {
     try {
         
-        Cita.find({"cEstado":{"$not":/Finalizada/}}).populate({
+        // {"cEstado":{"$not":/Finalizada/}}
+        Cita.find({}).populate({
             path: "nIdPaciente", model: "Paciente",
             select: {
                 'oGenerales.cNombre': 1, 'oGenerales.cApellidoP': 1,
@@ -86,12 +87,13 @@ function saveAppointment(req, res) {
     try {
 
 	Cita.findOne({"nIdPaciente": datos.IdPaciente, "$or":[{"cEstado": "Pendiente"},{"cEstado": "Confirmada"}]}, function(error, cita){
-		if(error){
+		if(error){            
 			return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
 		}	
-		if(cita){
+		if(cita){            
 			return res.status(status.OK).json({ Codigo: status.NO_CONTENT, Mensaje: "Cuenta con una cita pendiente o aceptada", Detalle:"" });
 		}
+        
 		Cita.create({
             nIdPaciente: datos.IdPaciente,
             nHora: datos.Hora,
@@ -101,9 +103,48 @@ function saveAppointment(req, res) {
             if (error) {
                 return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
-            if (!cita) {
+            if (!cita) {                
                 return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La cita no fue registrada", Detalle: '' });
+            }            
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
+        });
+	});
+    } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+
+
+function saveAppointmentWeb(req, res) {
+    try {
+        var datos = req.body.Cita;
+    }
+    catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Cita no especificada', Detalle: e.message });
+    }
+    try {
+
+	Cita.findOne({"nIdPaciente": datos.IdPaciente, "$or":[{"cEstado": "Pendiente"},{"cEstado": "Confirmada"}]}, function(error, cita){
+		if(error){            
+			return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+		}	
+		if(cita){            
+			return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.NO_CONTENT, Mensaje: "Cuenta con una cita pendiente o aceptada", Detalle:"" });
+		}
+        
+		Cita.create({
+            nIdPaciente: datos.IdPaciente,
+            nHora: datos.Hora,
+            cDescripcion: datos.Descripcion,
+            dFecha: datos.Fecha
+        }, function (error, cita) {
+            if (error) {
+                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
+            if (!cita) {                
+                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "La cita no fue registrada", Detalle: '' });
+            }            
             return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro exitoso', Detalle: '' });
         });
 	});
@@ -190,6 +231,7 @@ module.exports = {
     getAppointmentPatientId,
     getAppointmentAll,
     saveAppointment,
+    saveAppointmentWeb,
     updateAppointmentState,
     updateAppointment,
     deleteAppointment

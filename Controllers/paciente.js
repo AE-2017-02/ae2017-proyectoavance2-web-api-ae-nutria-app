@@ -1,7 +1,7 @@
 'use-strict'
 
 const Paciente = require('../Schemas/paciente');
-const Usuario =  require('../Schemas/usuario');
+const Usuario = require('../Schemas/usuario');
 const Service = require('../Service/functions');
 var status = require('http-status');
 
@@ -18,32 +18,59 @@ function getPatientPin(req, res) {
         var nuevoPin = Service.pin();
         Paciente.findOneAndUpdate({ "_id": req.params.id }, { $set: { "cPin": nuevoPin } },
             function (error, paciente) {
-                if (error) {                    
+                if (error) {
                     return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
                 }
                 if (!paciente)
-                    return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Usuario inexistente', Detalle: '' });                
-                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Pin registrado exitosamente', Detalle: { Pin: nuevoPin } });                
+                    return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Usuario inexistente', Detalle: '' });
+                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Pin registrado exitosamente', Detalle: { Pin: nuevoPin } });
             });
-    }
-    catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });     
-    }
-}
-
-function getPatientWeb(req, res) {
-    try {        
-        Usuario.find().select({ cNombre: 1, cImagen: 1 }).populate({
-            path: "nIdPaciente", model: "Paciente", select: {
-                'oGenerales.cNombre': 1,'oGenerales.cApellidoM': 1,'oGenerales.cApellidoP': 1, 'oGenerales.nEdad': 1, '_id': 1, 'NombreCompleto': 1, 'bEstado': 1
-            }
-        }).exec(Service.handleMany.bind(null, 'Pacientes', res));
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
 }
 
+function getPatientWebActive(req, res) {
+    try {
+        Paciente.find({"bEstado":true}).select(
+            {
+                'oGenerales.cNombre': 1, 'oGenerales.cApellidoM': 1, 'oGenerales.cApellidoP': 1, 'oGenerales.nEdad': 1,
+                '_id': 1, 'NombreCompleto': 1, 'bEstado': 1, 'dAlta': 1
+            }).exec(Service.handleMany.bind(null, 'Pacientes', res));
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+function getPatientWeb(req, res) {
+    try {
+        Paciente.find().select(
+            {
+                'oGenerales.cNombre': 1, 'oGenerales.cApellidoM': 1, 'oGenerales.cApellidoP': 1, 'oGenerales.nEdad': 1,
+                '_id': 1, 'NombreCompleto': 1, 'bEstado': 1, 'dAlta': 1
+            }).exec(Service.handleMany.bind(null, 'Pacientes', res));
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+function getPatientWebUsuario(req, res) {
+    try {
+        Usuario.find().select({ cNombre: 1, cImagen: 1, bEstado: 1 }).populate({
+            path: "nIdPaciente", model: "Paciente", select: {
+                'oGenerales.cNombre': 1, 'oGenerales.cApellidoM': 1, 'oGenerales.cApellidoP': 1, 'oGenerales.nEdad': 1,
+                '_id': 1, 'NombreCompleto': 1, 'bEstado': 1, 'dAlta': 1
+            }
+        })
+            .exec(Service.handleMany.bind(null, 'Pacientes', res));
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
 
 function getPatientId(req, res) {
     try {
@@ -59,6 +86,24 @@ function getPatientId(req, res) {
             path: "nIdPaciente", model: "Paciente",
         })
 
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
+
+function getPatientWebId(req, res) {
+    try {
+        Paciente.findOne({ _id: req.params.id }, function (error, paciente) {
+            if (error) {
+                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+            }
+            if (!paciente) {
+                return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });
+            }
+            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Operación exitosa', Paciente: paciente });
+        })
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
@@ -81,9 +126,9 @@ function savePatient(req, res) {
             }
             if (patient) {
                 return res.status(status.CONFLICT).json({ Codigo: status.CONFLICT, Mensaje: "El correo ya esta registrado", Detalle: '' });
-            }            
+            }
             Paciente.create({
-                cPin: Token(),                
+                cPin: Token(),
                 oGenerales: {
                     cNombre: datos.Generales.Nombre,
                     cApellidoP: datos.Generales.ApellidoP,
@@ -179,34 +224,43 @@ function updatePatientWeb(req, res) {
     }
 }
 
-function updatePatientState(req,res){
+function updatePatientState(req, res) {
     try {
-        Paciente.findOneAndUpdate({ "_id": req.params.id }, { $set: { "bEstado": true } },
-          function (error, paciente) {
-            if (error) {
-              return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
-            }
-            if (!paciente)
-              return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });            
-
-            return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Paciente registrado exitosamente', Detalle: { Paciente: paciente } });            
-          });
-      }
-      catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });        
-      }
+        Paciente.findOne({ "_id": req.params.id },
+            function (error, paciente) {
+                if (error) {
+                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+                }
+                if (!paciente)
+                    return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });                                
+                Paciente.findOneAndUpdate({ "_id": req.params.id }, { $set: { "bEstado": !paciente.bEstado } }, function (error, paciente) {
+                    if (error) {
+                        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+                    }
+                    if (!paciente)
+                        return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });
+                    return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Paciente registrado exitosamente', Detalle: { Paciente: paciente } });
+                });
+            });
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
 }
+
 
 function Token() {
-  return parseInt(Math.random() * 10000);
+    return parseInt(Math.random() * 10000);
 }
-module.exports = {    
+module.exports = {
     getApplication,
     getPatient,
     getPatientId,
     getPatientPin,
     getPatientWeb,
+    getPatientWebUsuario,
+    getPatientWebActive,
     updatePatientState,
     updatePatientWeb,
-    savePatient        
+    savePatient
 }

@@ -58,7 +58,7 @@ function signUp(req, res) {
             "bEstado": true
         }, function (error, paciente) {
             if (error) {
-                return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+                  return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
             }
             if (!paciente) {
                 return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });
@@ -145,6 +145,30 @@ function updateUser(req, res) {
     }
 }
 
+function updateUserState(req, res) {
+   try {
+        Usuario.findOne({ "_id": req.params.id },
+            function (error, usuario) {
+                if (error) {
+                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+                }
+                if (!usuario)
+                    return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });                                
+                Usuario.findOneAndUpdate({ "_id": req.params.id }, { $set: { "bEstado": !usuario.bEstado } }, function (error, usuario) {
+                    if (error) {
+                        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+                    }
+                    if (!usuario)
+                        return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'Paciente inexistente', Detalle: '' });
+                    return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Paciente registrado exitosamente', Detalle: { Paciente: usuario } });
+                });
+            });
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
 function updateUserApplication(req, res){
 	try { 
 		var datos = req.body.Usuario; 
@@ -210,5 +234,6 @@ module.exports = {
     updateUser,
     signIn,
     signUp,
-	updateUserApplication 
+	updateUserApplication,
+    updateUserState 
 }
