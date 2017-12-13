@@ -223,6 +223,21 @@ function deleteAppointment(req, res) {
 }
 
 
+function getUltimateAppointment(req, res){
+	try{
+		var id = req.params.id;
+	}catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+	try{
+		Cita.find({nIdPaciente: id, cEstado: "Confirmada"}).select({dFecha:1, nHora:1, _id:0}).sort({dFecha: -1}).limit(1).exec(Service.handleOne.bind(null, "Cita", res));
+	}catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+
+}
+
+
 
 module.exports = {
     getAppointment,
@@ -234,5 +249,6 @@ module.exports = {
     saveAppointmentWeb,
     updateAppointmentState,
     updateAppointment,
-    deleteAppointment
+    deleteAppointment,
+	getUltimateAppointment
 }

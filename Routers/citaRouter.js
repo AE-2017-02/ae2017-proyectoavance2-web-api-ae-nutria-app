@@ -10,5 +10,6 @@ module.exports = function(router){
     router.post('/appointment/addWeb', Appointment.saveAppointmentWeb),	    
     router.put('/appointment/update', Appointment.updateAppointment),
     router.put('/appointment/state', Appointment.updateAppointmentState),
-    router.delete('/appointment/:id', Appointment.deleteAppointment)
+    router.delete('/appointment/:id', Appointment.deleteAppointment),
+    router.get('/appointment/ultimate/:id', Appointment.getUltimateAppointment)
 }
