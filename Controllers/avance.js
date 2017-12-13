@@ -52,7 +52,7 @@ function getAvanceId(req, res) {
 function getAvanceFecha(req,res){
     try {
         Avance.find({ nIdPaciente: req.params.id }).select(
-            {'dFecha':1,'_id':-1}).exec(Service.handleMany.bind(null, 'Fecha',res));;
+            {'dCreacion':1}).exec(Service.handleMany.bind(null, 'Fecha',res));;
     }
     catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
