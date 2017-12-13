@@ -95,7 +95,7 @@ function saveNotificationAll(req, res) {
             contents: { "en": datos.Mensaje },
             headings:{"en": datos.Titulo},
             subtitle:{"en":datos.Asunto},                         	  	
-            filters:[{"field": "tag", "key": "IDPa", "relation": "=", "value": "5a19b2ef0807b0395f7fbcc2"}]};
+            filters:[{"field": "tag", "key": "IDPa", "relation": "=", "value": datos.Pacientes[0].nIdPaciente}]};
         }     
         sendNotification(message);
     } catch (e) {
