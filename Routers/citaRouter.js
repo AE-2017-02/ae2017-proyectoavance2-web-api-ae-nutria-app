@@ -7,6 +7,7 @@ module.exports = function(router){
     router.get('/appointment/day',Appointment.getAppointmentDay),
     router.get('/appointment/all',Appointment.getAppointmentAll),
 	router.post('/appointment/add', Appointment.saveAppointment),	
+    router.post('/appointment/addWeb', Appointment.saveAppointmentWeb),	    
     router.put('/appointment/update', Appointment.updateAppointment),
     router.put('/appointment/state', Appointment.updateAppointmentState),
     router.delete('/appointment/:id', Appointment.deleteAppointment)

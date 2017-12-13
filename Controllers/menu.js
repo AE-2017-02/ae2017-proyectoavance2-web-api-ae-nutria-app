@@ -103,7 +103,34 @@ function updateMenu(req, res) {
     } catch (e) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
+}
 
+function updateMenuComida(req, res) {
+    try {
+        var datos = req.body.Menu;
+    }
+    catch (e) {
+        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Clasificacion no especificada', Detalle: e.message });
+    }
+    try {
+        Menu.findOneAndUpdate({ "_id": datos.IdMenu },
+            {
+                $set:
+                {                    
+                    "oComida": datos.Comida
+                }
+            }, function (error, menu) {
+                if (error) {
+                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
+                }
+                if (!menu) {
+                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "El menú no existe", Detalle: '' });
+                }
+                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'Registro actualizado', Detalle: '' });
+            });
+    } catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
 }
 
 function deleteMenu(req, res) {
@@ -186,6 +213,7 @@ module.exports = {
     getMenuId,
     saveMenu,
     updateMenu,
+    updateMenuComida,
     deleteMenu,
     saveMenuFood,
     deleteMenuFood    

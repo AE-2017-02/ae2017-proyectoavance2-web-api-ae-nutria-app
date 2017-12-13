@@ -3,6 +3,7 @@ var mongoose=require('mongoose');
 var pacienteSchema=new mongoose.Schema({
     cPin:{type:String,maxlength:6},
     bEstado:{type:Boolean, default:false},
+    dAlta:{type:Date, defaulta: new Date()},
     oGenerales:{
         cNombre: {type: String,required: true},
         cApellidoP: {type: String,required: true},

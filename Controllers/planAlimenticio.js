@@ -17,7 +17,6 @@ function getPlanPatientId(req, res) {
 
         Plan.findOne({ nIdPaciente: req.params.id }).select({'oPlan.nIdMenu':1, 'oPlan.bEstado':1,'oPlan.nHora':1, 'oPlan.dConsumo':1}).sort({ dCreacion: -1 }).populate(
             { path: "oPlan.nIdMenu", model: "Menu",
-
             populate: [{path: "oComida.nIdProducto", 
             model: "Producto",select:{"cDescripcion":1,"_id":1}, 
             populate:[{path:"nIdUnidad", model:"Unidad",select:{"cDescripcion":1,"_id":0}},
@@ -31,6 +30,20 @@ function getPlanPatientId(req, res) {
         return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
 }
+
+function getMenuPlanPatientId(req, res) {
+    try {
+
+        Plan.findOne({ nIdPaciente: req.params.id }).
+        select({'oPlan.nIdMenu':1, 'oPlan.nHora':1}).        
+        sort({ dCreacion: -1 }).
+        exec(Service.handleMany.bind(null, 'Menu',res));
+    }
+    catch (e) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
+    }
+}
+
 
 function savePlan(req, res) {
     try {
@@ -247,7 +260,8 @@ function getPlanMenuDateId(req, res){
 
 module.exports = {
     getPlan,
-    getPlanPatientId,    
+    getPlanPatientId,
+    getMenuPlanPatientId,    
     savePlan,
     updatePlanMenu,
     deletePlanMenu,
