@@ -82,30 +82,49 @@ function updateUnity(req, res) {
 }
 
 function deleteUnity(req, res) {
-    try {
-        var datos = req.body.Unidad;
-    }
-    catch (e) {
-        return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Unidad no especificada', Detalle: e.message });        
-    }
 
     try {
-        Unidad.findOneAndUpdate({ "_id": datos.IdUnidad },
+        Unidad.findOneAndUpdate({ "_id": req.params.id },
             {
-                $set:{ "bEstado": false }
-            }, function (error, unidad) {
+                $set:
+                { "bEstado": false }
+            }, function (error, categoria) {
                 if (error) {
-                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });                    
+                    return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });
                 }
-                if (!unidad) {
-                    return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'La unidad no existe', Detalle: '' });                    
+                if (!categoria) {
+                    return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'La unidad no existe', Detalle: '' });
                 }
-                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'La unidad ha sido borrado exitosamente', Detalle: '' });                
+                return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'La unidad ha sido borrado exitosamente', Detalle: '' });
             });
     }
     catch (e) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });        
+        return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });
     }
+    // try {
+    //     var datos = req.body.Unidad;
+    // }
+    // catch (e) {
+    //     return res.status(status.BAD_REQUEST).json({ Codigo: status.BAD_REQUEST, Mensaje: 'Unidad no especificada', Detalle: e.message });        
+    // }
+
+    // try {
+    //     Unidad.findOneAndUpdate({ "_id": datos.IdUnidad },
+    //         {
+    //             $set:{ "bEstado": false }
+    //         }, function (error, unidad) {
+    //             if (error) {
+    //                 return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: error.toString() });                    
+    //             }
+    //             if (!unidad) {
+    //                 return res.status(status.NOT_FOUND).json({ Codigo: status.NOT_FOUND, Mensaje: 'La unidad no existe', Detalle: '' });                    
+    //             }
+    //             return res.status(status.OK).json({ Codigo: status.OK, Mensaje: 'La unidad ha sido borrado exitosamente', Detalle: '' });                
+    //         });
+    // }
+    // catch (e) {
+    //     return res.status(status.INTERNAL_SERVER_ERROR).json({ Codigo: status.INTERNAL_SERVER_ERROR, Mensaje: "Ha ocurrido un problema", Detalle: e.message });        
+    // }
 }
 
 
